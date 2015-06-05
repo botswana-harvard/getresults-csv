@@ -4,13 +4,13 @@ import result files exported from FACS Multiset
 
 Usage (so far):
 
-Load panels from a CSV file:
+Load panels from a CSV file into model Panel/PanelMapping:
 
     from getresults_facs.utils import load_panels_from_csv
     
     load_panels_from_csv()
     
-Load a Multiset CSV file:
+Load a Multiset CSV file into models Result/ResultItem:
 
     from getresults_facs.classes import Result
     from getresults_facs.getresults import GetResults
