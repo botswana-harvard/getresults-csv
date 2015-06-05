@@ -4,6 +4,7 @@ __pycache__/
 .pydevproject
 .project
 .settings
+db.sqlite3
 etc/*
 # C extensions
 *.so
