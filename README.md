@@ -35,12 +35,12 @@ Load a Multiset CSV file into models Result/ResultItem:
 
     gr = GetResults(filename, Result, encoding='mac_roman')
 
-    
+
     # save to the result model 
     # we just want CD4 Abs/%, CD8 Abs/% and some assay details like date and operator
 
-
     gr.save()
 
-	# the results should now be validated before release for clinical use.
+
+    # the results should now be validated before release for clinical use.
     
