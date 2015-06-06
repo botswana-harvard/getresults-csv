@@ -15,14 +15,16 @@ Load panels from a CSV file into model Panel/PanelMapping:
     from getresults_facs.utils import load_panels_from_csv
 
     # panels define the relevant fields in the file.
+    # a panel is made up of items where each item represents a utestid
     # panels are defined in multiset but a sample panel.csv is in this repo.
     # just need to do this once
     
     load_panels_from_csv()
+    load_utestids_from_csv()
+    load_panel_items_from_csv()
     
 Load a Multiset CSV file into models Result/ResultItem:
 
-    from getresults_facs.classes import Result
     from getresults_facs.getresults import GetResults
     
     # a sample file is available as testdata
@@ -33,7 +35,7 @@ Load a Multiset CSV file into models Result/ResultItem:
     # load the file and setup the class
     # encode as 'mac_roman' since Multiset runs on a Mac
 
-    gr = GetResults(filename, Result, encoding='mac_roman')
+    gr = GetResults(filename, encoding='mac_roman')
 
 
     # save to the result model 
