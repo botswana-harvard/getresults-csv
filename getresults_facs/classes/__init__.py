@@ -1,1 +1,1 @@
-from .result import Result
+from .panel_result import PanelResult, PanelResultItem

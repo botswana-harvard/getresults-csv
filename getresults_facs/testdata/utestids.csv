@@ -1,0 +1,5 @@
+name,quantifier,description
+CD4%,=,CD4 Percent
+CD8%,=,CD8 Percent
+CD4,=,CD4 Absolute
+CD8,=,CD8 Absolute

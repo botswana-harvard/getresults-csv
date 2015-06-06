@@ -3,11 +3,11 @@ import os
 
 from django.conf import settings
 
-from .models import Panel, PanelMapping
+from ..models import Panel, PanelMapping
 
 
 def load_panels_from_csv(csv_filename=None):
-    csv_filename = csv_filename or os.path.join(settings.BASE_DIR, 'panels.csv')
+    csv_filename = csv_filename or os.path.join(settings.BASE_DIR, 'testdata/panels.csv')
     with open(csv_filename, 'r') as f:
         reader = csv.reader(f, quotechar="'")
         header = next(reader)

@@ -1,0 +1,5 @@
+panel_name,utestid,value_type,value_datatype,lower_limit,upper_limit,precision,formula
+'CD3/CD8/CD45/CD4 TruC',CD4,absolute,integer,,,,,
+'CD3/CD8/CD45/CD4 TruC',CD8,absolute,integer,,,,,
+'CD3/CD8/CD45/CD4 TruC',CD4%,absolute,integer,,,,,
+'CD3/CD8/CD45/CD4 TruC',CD8%,absolute,integer,,,,,
