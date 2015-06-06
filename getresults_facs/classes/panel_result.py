@@ -42,15 +42,20 @@ class PanelResult(object):
         self.validated = False
         self.validation_datetime = None
         self.validation_operator = None
-        (panel_name, specimen_identifier, collection_datetime,
-         result_datetime, analyzer_name, analyzer_sn, operator) = self.parse_labels(labels)
-        self.panel = Panel.objects.get(name__iexact=result_as_dict[panel_name].strip())
-        self.specimen_identifier = result_as_dict[specimen_identifier]
-        self.collection_datetime = tz.localize(parser.parse(result_as_dict[collection_datetime]))
-        self.result_datetime = tz.localize(parser.parse(result_as_dict[result_datetime]))
-        self.analyzer_name = result_as_dict[analyzer_name]
-        self.analyzer_sn = result_as_dict[analyzer_sn]
-        self.operator = result_as_dict[operator]
+        lbl_panel_name = self.parse_labels(labels, 'panel_name', 'Panel Name')
+        lbl_specimen_identifier = self.parse_labels(labels, 'specimen_identifier', 'Sample ID')
+        lbl_collection_datetime = self.parse_labels(labels, 'collection_datetime', 'Collection Date')
+        lbl_result_datetime = self.parse_labels(labels, 'result_datetime', 'Date Analyzed')
+        lbl_analyzer_name = self.parse_labels(labels, 'analyzer_name', 'Cytometer')
+        lbl_analyzer_sn = self.parse_labels(labels, 'analyzer_sn', 'Cytometer Serial Number')
+        lbl_operator = self.parse_labels(labels, 'operator', 'Operator')
+        self.panel = Panel.objects.get(name__iexact=result_as_dict[lbl_panel_name].strip())
+        self.specimen_identifier = result_as_dict[lbl_specimen_identifier]
+        self.collection_datetime = tz.localize(parser.parse(result_as_dict[lbl_collection_datetime]))
+        self.result_datetime = tz.localize(parser.parse(result_as_dict[lbl_result_datetime]))
+        self.analyzer_name = result_as_dict[lbl_analyzer_name]
+        self.analyzer_sn = result_as_dict[lbl_analyzer_sn]
+        self.operator = result_as_dict[lbl_operator]
 
     def __repr__(self):
         return '{}({}: {})'.format(self.__class__.__name__, self.panel, self.source.split('/')[-1])
@@ -62,37 +67,11 @@ class PanelResult(object):
         for r in self.as_list:
             yield r
 
-    def parse_labels(self, labels):
+    def parse_labels(self, labels, key, default):
         try:
-            panel_name = labels['panel_name']
+            return labels[key]
         except (KeyError, TypeError):
-            panel_name = 'Panel Name'
-        try:
-            specimen_identifier = labels['specimen_identfier']
-        except (KeyError, TypeError):
-            specimen_identifier = 'Sample ID'
-        try:
-            collection_datetime = labels['collection_datetime']
-        except (KeyError, TypeError):
-            collection_datetime = 'Collection Date'
-        try:
-            result_datetime = labels['result_datetime']
-        except (KeyError, TypeError):
-            result_datetime = 'Date Analyzed'
-        try:
-            analyzer_name = labels['analyzer_name']
-        except (KeyError, TypeError):
-            analyzer_name = 'Cytometer'
-        try:
-            analyzer_sn = labels['analyzer_sn']
-        except (KeyError, TypeError):
-            analyzer_sn = 'Cytometer Serial Number'
-        try:
-            operator = labels['operator']
-        except (KeyError, TypeError):
-            operator = 'Operator'
-        return (panel_name, specimen_identifier, collection_datetime,
-                result_datetime, analyzer_name, analyzer_sn, operator)
+            return default
 
     @property
     def as_list(self):
