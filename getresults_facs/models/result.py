@@ -1,7 +1,10 @@
 from django.db import models
+
 from simple_history.models import HistoricalRecords
 
 from .panel import Panel
+from .import_history import ImportHistory
+from .export_history import ExportHistory
 
 
 class Result(models.Model):
@@ -19,11 +22,14 @@ class Result(models.Model):
     analyzer_sn = models.CharField(
         max_length=25)
 
-    source = models.CharField(
-        max_length=25)
-
     operator = models.CharField(
         max_length=25)
+
+    # validation_history
+
+    import_history = models.ForeignKey(ImportHistory)
+
+    export_history = models.ForeignKey(ExportHistory, null=True)
 
     history = HistoricalRecords()
 
@@ -33,37 +39,3 @@ class Result(models.Model):
     class _Meta:
         app_label = 'getresults_facs'
         unique_together = ('specimen_identifier', 'collection_datetime')
-
-
-class ResultItem(models.Model):
-
-    result = models.ForeignKey(Result)
-
-    utestid = models.CharField(
-        max_length=10)
-
-    value = models.CharField(
-        max_length=25)
-
-    quantifier = models.CharField(
-        max_length=3)
-
-    result_datetime = models.DateTimeField()
-
-    validation_operator = models.CharField(
-        max_length=25,
-        null=True,
-        blank=True)
-
-    validation_datetime = models.DateTimeField(
-        null=True,
-        blank=True)
-
-    history = HistoricalRecords()
-
-    def __str__(self):
-        return '{}: {}'.format(self.utestid, str(self.result))
-
-    class _Meta:
-        app_label = 'getresults_facs'
-        unique_together = ('result', 'utestid', 'result_datetime')

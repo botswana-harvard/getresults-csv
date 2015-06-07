@@ -46,3 +46,24 @@ Load a Multiset CSV file into models Result/ResultItem:
 
     # the results should now be validated before release for clinical use.
     
+Panels
+------
+A panel is a named group of items where each item represents a result. For example, a CD4 panel might
+consist of CD4 Absolute, CD4%, CD8 Absolute and CD8%. A clinic orders a CD4 but expects 4 values on the report.
+
+Panel Items
+-----------
+A panel item represents one item in the panel. It is the link between a the panel and a Utestid.
+
+Utestids
+--------
+A Utestid (Universal Test Identifier) represents one result item in a panel. It has attributes and methods
+that further define the result value. For example, the test may be limited to lower and upper limits of
+detection where a raw value, say 300, if below the lower limit of detection, say 400, should be reported
+as < 400 and not 300.
+
+Utestids can also be calculated. A calculated value is not reported from the analyzer but should be 
+included in the result report. For example, an analyzer reports the viral load (PHM) as copies/ml but the report 
+requires both the absolute value and the LOG of the value. The LOG is a calculated Utestid (e.g. PHMLOG10).
+ 
+A Utestid may appear in more than one panel.

@@ -8,3 +8,9 @@ VALUE_DATATYPES = (
     ('integer', 'integer'),
     ('decimal', 'decimal'),
 )
+
+VALIDATION_CHOICES = (
+    ('accept', 'Accept'),
+    ('reject', 'Reject'),
+    (None, 'Do nothing'),
+)

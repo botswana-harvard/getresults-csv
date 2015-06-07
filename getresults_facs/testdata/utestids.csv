@@ -1,5 +1,7 @@
-name,quantifier,description
-CD4%,=,CD4 Percent
-CD8%,=,CD8 Percent
-CD4,=,CD4 Absolute
-CD8,=,CD8 Absolute
+name,description,value_type,value_datatype,lower_limit,upper_limit,precision,formula,formula_utestid
+CD4%,CD4 Percent,absolute,integer,,,,,,
+CD8%,CD8 Percent,absolute,integer,,,,,,
+CD4,CD4 Absolute,absolute,integer,,,,,,
+CD8,CD8 Absolute,absolute,integer,,,,,,
+PHM,Viral Load,absolute,integer,400,750000,0,,,
+PHMLOG10,Viral Load,calculated,decimal,,,2,LOG10,PHM

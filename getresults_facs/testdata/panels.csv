@@ -27,5 +27,4 @@
 'PLG CD4','simple_CD4_perc','CD4%'
 'PLG CD4','simple_cd8_abs_cnt','CD8'
 'PLG CD4','simple_CD8_perc','CD8%'
-'ROCHE AMPLICOR','log10_vl','LOG10'
-'ROCHE AMPLICOR','RESULT','PHM'
+'VL','PHM','PHM'
