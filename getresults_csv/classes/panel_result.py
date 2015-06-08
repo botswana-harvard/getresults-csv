@@ -32,7 +32,7 @@ class PanelResult(object):
     """
     Represents result items for a panel.
     """
-    def __init__(self, result_as_dict, source, labels=None):
+    def __init__(self, result_as_dict, source, header_labels=None):
         self._as_list = []
         self._as_dict = {}
         self.result_as_dict = result_as_dict
@@ -40,13 +40,13 @@ class PanelResult(object):
         self.validated = False
         self.validation_datetime = None
         self.validation_operator = None
-        lbl_panel_name = self.parse_labels(labels, 'panel_name', 'panel name')
-        lbl_specimen_identifier = self.parse_labels(labels, 'specimen_identifier', 'sample id')
-        lbl_collection_datetime = self.parse_labels(labels, 'collection_datetime', 'collection date')
-        lbl_result_datetime = self.parse_labels(labels, 'result_datetime', 'date analyzed')
-        lbl_analyzer_name = self.parse_labels(labels, 'analyzer_name', 'cytometer')
-        lbl_analyzer_sn = self.parse_labels(labels, 'analyzer_sn', 'cytometer serial number')
-        lbl_operator = self.parse_labels(labels, 'operator', 'operator')
+        lbl_panel_name = self.parse_header_labels(header_labels, 'panel_name', 'panel name')
+        lbl_specimen_identifier = self.parse_header_labels(header_labels, 'specimen_identifier', 'sample id')
+        lbl_collection_datetime = self.parse_header_labels(header_labels, 'collection_datetime', 'collection date')
+        lbl_result_datetime = self.parse_header_labels(header_labels, 'result_datetime', 'date analyzed')
+        lbl_analyzer_name = self.parse_header_labels(header_labels, 'analyzer_name', 'cytometer')
+        lbl_analyzer_sn = self.parse_header_labels(header_labels, 'analyzer_sn', 'cytometer serial number')
+        lbl_operator = self.parse_header_labels(header_labels, 'operator', 'operator')
         try:
             self.panel = Panel.objects.get(name__iexact=result_as_dict[lbl_panel_name].strip())
         except Panel.DoesNotExist as e:
@@ -68,9 +68,9 @@ class PanelResult(object):
         for r in self.as_list:
             yield r
 
-    def parse_labels(self, labels, key, default):
+    def parse_header_labels(self, header_labels, key, default):
         try:
-            return labels[key]
+            return header_labels[key]
         except (KeyError, TypeError):
             return default
 

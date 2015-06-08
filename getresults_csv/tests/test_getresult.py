@@ -7,8 +7,10 @@ from django.test import TestCase
 
 from ..classes.panel_result import PanelResultItem, PanelResult
 from ..getresults import GetResults
-from ..models import Panel, PanelItem, Utestid, ImportHistory, Result, ResultItem, PanelMapping
-from ..utils import load_panels_from_csv, load_utestids_from_csv, load_panel_items_from_csv
+from ..models import (
+    Panel, PanelItem, Utestid, ImportHistory, Result, ResultItem, PanelMapping, CsvHeader, CsvHeaderItem)
+from ..utils import (
+    load_panels_from_csv, load_utestids_from_csv, load_panel_items_from_csv, load_csv_headers_from_csv)
 
 
 class TestGetresult(TestCase):
@@ -18,6 +20,7 @@ class TestGetresult(TestCase):
         load_panels_from_csv()
         load_utestids_from_csv()
         load_panel_items_from_csv()
+        load_csv_headers_from_csv()
 
     def test_load(self):
         """Assert correct number of records created based on testdata."""
@@ -25,6 +28,8 @@ class TestGetresult(TestCase):
         self.assertEquals(PanelItem.objects.all().count(), 6)
         self.assertEquals(PanelMapping.objects.all().count(), 29)
         self.assertEquals(Utestid.objects.all().count(), 6)
+        self.assertEquals(CsvHeader.objects.all().count(), 1)
+        self.assertEquals(CsvHeaderItem.objects.all().count(), 7)
 
     def test_panel_item_string(self):
         """Asserts a string result is imported and formatted correctly."""
@@ -83,20 +88,48 @@ class TestGetresult(TestCase):
         value = panel_item.value(750000)
         self.assertEquals(value, round(math.log10(750000), 2))
 
-    def test_panel_item_calc_created(self):
+    def test_header_labels_as_dict(self):
         """Asserts a calculated result is created once the formula_utestid value is available."""
         filename = os.path.join(settings.BASE_DIR, 'testdata/vl.csv')
-        labels = {
+        header_labels = {
             'panel_name': 'panel_name',
             'analyzer_name': 'analyzer_name',
             'analyzer_sn': 'analyzer_sn',
             'collection_datetime': 'collection_datetime',
             'specimen_identifier': 'specimen_identifier',
-            'phm': 'phm',
             'result_datetime': 'result_datetime',
             'operator': 'operator',
         }
-        get_results = GetResults(filename, labels=labels, delimiter=',')
+        get_results = GetResults(filename, header_labels=header_labels, delimiter=',')
+        result = get_results.save()
+        source = str(filename.name)
+        self.assertEquals(ImportHistory.objects.get(source=source).source, source)
+        self.assertEquals(ResultItem.objects.filter(result=result).count(), 2)
+        self.assertTrue(ResultItem.objects.filter(result=result, utestid__name='phmlog10').exists())
+
+    def test_header_labels_as_csv_header(self):
+        """Asserts a calculated result is created once the formula_utestid value is available."""
+        filename = os.path.join(settings.BASE_DIR, 'testdata/vl.csv')
+        get_results = GetResults(filename, csv_header_name='amplicore', delimiter=',')
+        result = get_results.save()
+        source = str(filename.name)
+        self.assertEquals(ImportHistory.objects.get(source=source).source, source)
+        self.assertEquals(ResultItem.objects.filter(result=result).count(), 2)
+        self.assertTrue(ResultItem.objects.filter(result=result, utestid__name='phmlog10').exists())
+
+    def test_panel_item_calc_created(self):
+        """Asserts a calculated result is created once the formula_utestid value is available."""
+        filename = os.path.join(settings.BASE_DIR, 'testdata/vl.csv')
+        header_labels = {
+            'panel_name': 'panel_name',
+            'analyzer_name': 'analyzer_name',
+            'analyzer_sn': 'analyzer_sn',
+            'collection_datetime': 'collection_datetime',
+            'specimen_identifier': 'specimen_identifier',
+            'result_datetime': 'result_datetime',
+            'operator': 'operator',
+        }
+        get_results = GetResults(filename, header_labels=header_labels, delimiter=',')
         result = get_results.save()
         source = str(filename.name)
         self.assertEquals(ImportHistory.objects.get(source=source).source, source)

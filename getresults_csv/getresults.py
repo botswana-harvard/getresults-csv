@@ -9,17 +9,30 @@ from .models import Result, ResultItem, ImportHistory, CsvHeaderItem, CsvHeader
 
 class GetResults(object):
 
-    def __init__(self, filename, source=None, encoding=None, delimiter=None, labels=None, csv_header_name=None):
+    def __init__(self, filename, source=None, encoding=None,
+                 delimiter=None, header_labels=None, csv_header_name=None):
+        """Loads filename into itself.
+
+        Keywords:
+            * source: not tested
+            * encoding: if coming from an old MAC, use 'mac_roman' (default: utf-8);
+            * delimiter: a valid CSV delimiter;
+            * header_labels: a dictionary of {key: header label} where key is a key expected
+              by this class and header label is a field in the CSV header;
+            * csv_header_name: Does a lookup by this name on CsvHeader and populates
+              the labels dictionary. if provided overrides labels.
+        """
         self.filename = os.path.expanduser(filename)
-        self.labels = labels
         try:
-            self.labels = {}
+            self.header_labels = {}
             self.csv_header = CsvHeader.objects.get(name=csv_header_name)
             for item in CsvHeaderItem.objects.filter(csv_header=self.csv_header):
-                self.labels.update({item.key: item.header_field})
+                self.header_labels.update({item.key: item.header_field})
         except CsvHeader.DoesNotExist as e:
             if csv_header_name:
                 raise CsvHeader.DoesNotExist('{} Got \'{}\''.format(e, csv_header_name))
+            else:
+                self.header_labels = header_labels
         self.source = source or str(filename.name)
         self.encoding = encoding or 'utf-8'  # mac_roman
         self.panel_results = OrderedDict()
@@ -40,7 +53,8 @@ class GetResults(object):
             header = next(reader)
             header = [h.lower() for h in header]
             for values in reader:
-                panel_result = PanelResult(dict(zip(header, values)), self.filename, labels=self.labels)
+                panel_result = PanelResult(dict(zip(header, values)), self.filename,
+                                           header_labels=self.header_labels)
                 self.panel_results[panel_result.specimen_identifier] = panel_result
                 if not panel:
                     panel = panel_result.panel
@@ -50,7 +64,7 @@ class GetResults(object):
                             self.panel, panel_result['Panel Name']))
 
     def save(self):
-        """Saves the CSV data to the local result table."""
+        """Saves the CSV data to the local result tables."""
         import_history = ImportHistory.objects.create(
             source=self.source,
             record_count=len(self.panel_results.values())
