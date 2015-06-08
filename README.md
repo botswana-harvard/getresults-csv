@@ -1,14 +1,36 @@
-[![Build Status](https://travis-ci.org/botswana-harvard/getresults-facs.svg?branch=develop)](https://travis-ci.org/botswana-harvard/getresults-facs)
-[![Coverage Status](https://coveralls.io/repos/botswana-harvard/getresults-facs/badge.svg?branch=develop)](https://coveralls.io/r/botswana-harvard/getresults-facs?branch=develop)
-[![Documentation Status](https://readthedocs.org/projects/getresults-facs/badge/?version=latest)](https://readthedocs.org/projects/getresults-facs/?badge=latest)
-[![PyPI version](https://badge.fury.io/py/getresults-facs.svg)](http://badge.fury.io/py/getresults-facs)
-[![Code Health](https://landscape.io/github/botswana-harvard/getresults-facs/develop/landscape.svg?style=flat)](https://landscape.io/github/botswana-harvard/getresults-facs/develop)
+[![Build Status](https://travis-ci.org/botswana-harvard/getresults-csv.svg?branch=develop)](https://travis-ci.org/botswana-harvard/getresults-csv)
+[![Coverage Status](https://coveralls.io/repos/botswana-harvard/getresults-csv/badge.svg?branch=develop)](https://coveralls.io/r/botswana-harvard/getresults-csv?branch=develop)
+[![Documentation Status](https://readthedocs.org/projects/getresults-csv/badge/?version=latest)](https://readthedocs.org/projects/getresults-csv/?badge=latest)
+[![PyPI version](https://badge.fury.io/py/getresults-csv.svg)](http://badge.fury.io/py/getresults-csv)
+[![Code Health](https://landscape.io/github/botswana-harvard/getresults-csv/develop/landscape.svg?style=flat)](https://landscape.io/github/botswana-harvard/getresults-csv/develop)
 
-# getresults-facs
+# getresults-csv
 
-import result files exported from BD FACSCalibur through Multiset.
+import CSV result files.
+
+By default can import BD FACSCalibur Multiset export file.
 
 Usage (so far):
+===============
+
+Management Commands
+-------------------
+
+Load definitions:
+
+	python manage.py import_definitions <path>
+
+Import a Multiset result file
+
+    python manage.py import_result_file 15052015.csv
+
+Import a result file names 'vl.csv' with a pre-defined CSV header 'amplicore' delimiter by a comma:
+
+    python manage.py import_result_file vl.csv --csv_header_name=amplicore --delimiter=,
+
+
+In manage.py shell
+------------------
 
 Load panels from a CSV file into model Panel/PanelMapping:
 
@@ -29,7 +51,7 @@ Load a Multiset CSV file into models Result/ResultItem:
     
     # a sample file is available as testdata
 
-    filename = '~/source/getresults-facs/getresults_facs/testdata/rad9A6A3.tmp'
+    filename = '~/source/getresults-csv/getresults_facs/testdata/rad9A6A3.tmp'
 
     
     # load the file and setup the class
