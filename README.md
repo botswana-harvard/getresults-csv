@@ -6,7 +6,7 @@
 
 # getresults-csv
 
-import CSV result files.
+Import laboratory result from a CSV file.
 
 By default can import BD FACSCalibur Multiset export file.
 
