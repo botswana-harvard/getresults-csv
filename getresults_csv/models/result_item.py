@@ -2,10 +2,10 @@ from django.db import models
 
 from simple_history.models import HistoricalRecords
 
-from getresults_csv import VALIDATION_CHOICES
+from ..choices import VALIDATION_CHOICES
 
-from getresults_csv import Result
-from getresults_csv import Utestid
+from .result import Result
+from .utestid import Utestid
 
 
 class ResultItem(models.Model):

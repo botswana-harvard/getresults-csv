@@ -4,8 +4,8 @@ from math import log10
 
 from django.db import models
 
-from getresults_csv import Panel
-from getresults_csv import Utestid
+from .panel import Panel
+from .utestid import Utestid
 
 
 class PanelItem(models.Model):

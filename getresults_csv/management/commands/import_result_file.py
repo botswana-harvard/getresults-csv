@@ -5,8 +5,8 @@ from unipath import Path
 
 from django.core.management.base import BaseCommand, CommandError
 
-from getresults_facs.getresults import GetResults
-from getresults_facs.models import Panel, CsvHeader
+from getresults_csv.getresults import GetResults
+from getresults_csv.models import Panel, CsvHeader
 
 
 class Command(BaseCommand):

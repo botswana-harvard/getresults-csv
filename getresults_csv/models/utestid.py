@@ -1,6 +1,6 @@
 from django.db import models
 
-from getresults_csv import VALUE_DATATYPES, VALUE_TYPES
+from ..choices import VALUE_DATATYPES, VALUE_TYPES
 
 
 class Utestid(models.Model):

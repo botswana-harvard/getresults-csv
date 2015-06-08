@@ -6,10 +6,10 @@ from collections import OrderedDict
 
 from django.core.management.base import BaseCommand, CommandError
 
-from getresults_facs.utils import (load_panel_items_from_csv,
-                                   load_panels_from_csv,
-                                   load_utestids_from_csv,
-                                   load_csv_headers_from_csv)
+from getresults_csv.utils import (load_panel_items_from_csv,
+                                  load_panels_from_csv,
+                                  load_utestids_from_csv,
+                                  load_csv_headers_from_csv)
 
 
 class Command(BaseCommand):

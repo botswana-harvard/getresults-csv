@@ -1,6 +1,6 @@
 from django.db import models
 
-from getresults_csv import Panel
+from .panel import Panel
 
 
 class PanelMapping(models.Model):

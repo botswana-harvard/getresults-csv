@@ -2,9 +2,9 @@ from django.db import models
 
 from simple_history.models import HistoricalRecords
 
-from getresults_csv import Panel
-from getresults_csv import ImportHistory
-from getresults_csv import ExportHistory
+from .panel import Panel
+from .import_history import ImportHistory
+from .export_history import ExportHistory
 
 
 class Result(models.Model):
