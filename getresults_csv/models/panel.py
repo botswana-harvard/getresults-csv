@@ -12,5 +12,5 @@ class Panel(models.Model):
         return self.name
 
     class Meta:
-        app_label = 'getresults_facs'
+        app_label = 'getresults_csv'
         ordering = ('name', )

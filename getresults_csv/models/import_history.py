@@ -17,5 +17,5 @@ class ImportHistory(models.Model):
         return '{}: {}'.format(self.source, self.import_datetime)
 
     class Meta:
-        app_label = 'getresults_facs'
+        app_label = 'getresults_csv'
         ordering = ('-import_datetime', )

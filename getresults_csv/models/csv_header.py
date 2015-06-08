@@ -23,7 +23,7 @@ class CsvHeader(models.Model):
         return self.name
 
     class Meta:
-        app_label = 'getresults_facs'
+        app_label = 'getresults_csv'
 
 
 class CsvHeaderItem(models.Model):
@@ -41,5 +41,5 @@ class CsvHeaderItem(models.Model):
         return '{}: {}'.format(str(self.csv_header), self.key)
 
     class Meta:
-        app_label = 'getresults_facs'
+        app_label = 'getresults_csv'
         unique_together = (('csv_header', 'key'), ('csv_header', 'header_field'))

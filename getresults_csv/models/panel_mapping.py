@@ -1,6 +1,6 @@
 from django.db import models
 
-from .panel import Panel
+from getresults_csv import Panel
 
 
 class PanelMapping(models.Model):
@@ -22,7 +22,7 @@ class PanelMapping(models.Model):
         return '{}: {}'.format(self.utestid, str(self.panel))
 
     class Meta:
-        app_label = 'getresults_facs'
+        app_label = 'getresults_csv'
         unique_together = (
             ('panel', 'csv_field_name'),
             ('panel', 'utestid_name')

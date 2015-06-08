@@ -2,10 +2,10 @@ from django.db import models
 
 from simple_history.models import HistoricalRecords
 
-from ..choices import VALIDATION_CHOICES
+from getresults_csv import VALIDATION_CHOICES
 
-from .result import Result
-from .utestid import Utestid
+from getresults_csv import Result
+from getresults_csv import Utestid
 
 
 class ResultItem(models.Model):
@@ -43,5 +43,5 @@ class ResultItem(models.Model):
         return '{}: {}'.format(self.utestid, str(self.result))
 
     class Meta:
-        app_label = 'getresults_facs'
+        app_label = 'getresults_csv'
         unique_together = ('result', 'utestid', 'result_datetime')

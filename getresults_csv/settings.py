@@ -38,7 +38,7 @@ INSTALLED_APPS = (
     'django.contrib.sessions',
     'django.contrib.messages',
     'django.contrib.staticfiles',
-    'getresults_facs',
+    'getresults_csv',
 )
 
 MIDDLEWARE_CLASSES = (
@@ -52,7 +52,7 @@ MIDDLEWARE_CLASSES = (
     'django.middleware.security.SecurityMiddleware',
 )
 
-ROOT_URLCONF = 'getresults_facs.urls'
+ROOT_URLCONF = 'getresults_csv.urls'
 
 TEMPLATES = [
     {
@@ -70,7 +70,7 @@ TEMPLATES = [
     },
 ]
 
-WSGI_APPLICATION = 'getresults_facs.wsgi.application'
+WSGI_APPLICATION = 'getresults_csv.wsgi.application'
 
 
 # Database

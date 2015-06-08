@@ -4,8 +4,8 @@ from math import log10
 
 from django.db import models
 
-from .panel import Panel
-from .utestid import Utestid
+from getresults_csv import Panel
+from getresults_csv import Utestid
 
 
 class PanelItem(models.Model):
@@ -81,6 +81,6 @@ class PanelItem(models.Model):
         return ('=', value)
 
     class Meta:
-        app_label = 'getresults_facs'
+        app_label = 'getresults_csv'
         unique_together = ('panel', 'utestid')
         ordering = ('panel', 'utestid')

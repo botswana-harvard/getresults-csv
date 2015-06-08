@@ -1,6 +1,6 @@
 from django.db import models
 
-from ..choices import VALUE_DATATYPES, VALUE_TYPES
+from getresults_csv import VALUE_DATATYPES, VALUE_TYPES
 
 
 class Utestid(models.Model):
@@ -61,4 +61,4 @@ class Utestid(models.Model):
         return self.name
 
     class Meta:
-        app_label = 'getresults_facs'
+        app_label = 'getresults_csv'

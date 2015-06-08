@@ -15,5 +15,5 @@ class ExportHistory(models.Model):
         default=uuid4)
 
     class Meta:
-        app_label = 'getresults_facs'
+        app_label = 'getresults_csv'
         ordering = ('-export_datetime', )

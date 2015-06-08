@@ -2,9 +2,9 @@ from django.db import models
 
 from simple_history.models import HistoricalRecords
 
-from .panel import Panel
-from .import_history import ImportHistory
-from .export_history import ExportHistory
+from getresults_csv import Panel
+from getresults_csv import ImportHistory
+from getresults_csv import ExportHistory
 
 
 class Result(models.Model):
@@ -37,5 +37,5 @@ class Result(models.Model):
         return '{}: {}'.format(self.specimen_identifier, str(self.panel))
 
     class _Meta:
-        app_label = 'getresults_facs'
+        app_label = 'getresults_csv'
         unique_together = ('specimen_identifier', 'collection_datetime')
