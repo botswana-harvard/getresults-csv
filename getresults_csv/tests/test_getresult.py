@@ -8,7 +8,7 @@ from django.test import TestCase
 from ..classes.panel_result import PanelResultItem, PanelResult
 from ..getresults import GetResults
 from ..models import (
-    Panel, PanelItem, Utestid, ImportHistory, Result, ResultItem, PanelMapping, CsvHeader, CsvHeaderItem)
+    Panel, PanelItem, Utestid, ImportHistory, Result, ResultItem, CsvMapping, CsvHeader, CsvHeaderItem)
 from ..utils import (
     load_panels_from_csv, load_utestids_from_csv, load_panel_items_from_csv, load_csv_headers_from_csv)
 
@@ -26,7 +26,7 @@ class TestGetresult(TestCase):
         """Assert correct number of records created based on testdata."""
         self.assertEquals(Panel.objects.all().count(), 8)
         self.assertEquals(PanelItem.objects.all().count(), 6)
-        self.assertEquals(PanelMapping.objects.all().count(), 29)
+        self.assertEquals(CsvMapping.objects.all().count(), 29)
         self.assertEquals(Utestid.objects.all().count(), 6)
         self.assertEquals(CsvHeader.objects.all().count(), 1)
         self.assertEquals(CsvHeaderItem.objects.all().count(), 7)

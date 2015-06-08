@@ -1,7 +1,7 @@
 from django.contrib import admin
 
 from .models import (
-    Result, ResultItem, Panel, PanelItem, PanelMapping, Utestid, CsvHeader, CsvHeaderItem, ImportHistory)
+    Result, ResultItem, Panel, PanelItem, CsvMapping, Utestid, CsvHeader, CsvHeaderItem, ImportHistory)
 
 
 class ResultAdmin(admin.ModelAdmin):
@@ -23,9 +23,9 @@ class PanelAdmin(admin.ModelAdmin):
 admin.site.register(Panel, PanelAdmin)
 
 
-class PanelMappingAdmin(admin.ModelAdmin):
+class CsvMappingAdmin(admin.ModelAdmin):
     pass
-admin.site.register(PanelMapping, PanelMappingAdmin)
+admin.site.register(CsvMapping, CsvMappingAdmin)
 
 
 class PanelItemAdmin(admin.ModelAdmin):

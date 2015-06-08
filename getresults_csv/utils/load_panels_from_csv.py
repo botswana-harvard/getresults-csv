@@ -3,7 +3,7 @@ import os
 
 from django.conf import settings
 
-from ..models import Panel, PanelMapping
+from ..models import Panel, CsvMapping
 
 
 def load_panels_from_csv(csv_filename=None):
@@ -20,11 +20,11 @@ def load_panels_from_csv(csv_filename=None):
             except Panel.DoesNotExist:
                 panel = Panel.objects.create(name=r['panel'].strip().lower())
             try:
-                PanelMapping.objects.get(
+                CsvMapping.objects.get(
                     panel=panel,
                     csv_field_name=r['csv_field'].strip().lower())
-            except PanelMapping.DoesNotExist:
-                PanelMapping.objects.create(
+            except CsvMapping.DoesNotExist:
+                CsvMapping.objects.create(
                     panel=panel,
                     csv_field_name=r['csv_field'].strip().lower(),
                     utestid_name=r['utestid'].strip().lower())

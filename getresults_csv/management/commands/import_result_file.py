@@ -30,15 +30,14 @@ class Command(BaseCommand):
             help='specify delimiter (default: \t)')
 
     def handle(self, *args, **options):
-        print(options)
         try:
             for filename in options['filename']:
                 filename = Path(os.path.expanduser(filename))
                 sys.stdout.write('Importing {} ...'.format(filename.name))
                 getresults = GetResults(
                     filename,
-                    csv_header_name=options['csv_header_name'][0],
-                    delimiter=options['delimiter'][0])
+                    csv_header_name=options['csv_header_name'],
+                    delimiter=options['delimiter'])
                 getresults.save()
                 sys.stdout.write('\nDone\n'.format(filename.name))
         except (Panel.DoesNotExist, CsvHeader.DoesNotExist, FileNotFoundError) as e:

@@ -15,14 +15,14 @@ def load_csv_headers_from_csv(csv_filename=None):
         for row in reader:
             r = dict(zip(header, row))
             try:
-                csv_header = CsvHeader.objects.get(name=r['header_name'])
+                csv_header = CsvHeader.objects.get(name=r['header_name'].lower())
             except CsvHeader.DoesNotExist:
-                csv_header = CsvHeader.objects.create(name=r['header_name'])
+                csv_header = CsvHeader.objects.create(name=r['header_name'].lower())
             try:
-                CsvHeaderItem.objects.get(csv_header=csv_header, key=r['key'])
+                CsvHeaderItem.objects.get(csv_header=csv_header, key=r['key'].lower())
             except CsvHeaderItem.DoesNotExist:
                 CsvHeaderItem.objects.create(
                     csv_header=csv_header,
-                    key=r['key'],
-                    header_field=r['header_field']
+                    key=r['key'].lower(),
+                    header_field=r['header_field'].lower()
                 )

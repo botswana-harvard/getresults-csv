@@ -4,7 +4,7 @@ from dateutil import parser
 
 from django.conf import settings
 
-from ..models import PanelMapping, Panel, Utestid, PanelItem
+from ..models import CsvMapping, Panel, Utestid, PanelItem
 
 tz = pytz.timezone(settings.TIME_ZONE)
 
@@ -84,7 +84,7 @@ class PanelResult(object):
                 utestids.update({panel_item.utestid.name: panel_item.utestid})
                 if panel_item.utestid.formula_utestid_name:
                     calculated[panel_item.utestid.formula_utestid_name] = panel_item
-            for mapping in PanelMapping.objects.filter(panel=self.panel):
+            for mapping in CsvMapping.objects.filter(panel=self.panel):
                 utestid = Utestid.objects.get(name=mapping.utestid_name)
                 panel_item = PanelItem.objects.get(panel=self.panel, utestid=utestid)
                 self._as_list.append(

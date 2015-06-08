@@ -6,3 +6,10 @@ amplicore,collection_datetime,collection_datetime
 amplicore,specimen_identifier,specimen_identifier
 amplicore,result_datetime,result_datetime
 amplicore,operator,operator
+multiset,panel_name,Panel Name
+multiset,analyzer_name,Cytometer
+multiset,analyzer_sn,Cytometer Serial Number
+multiset,collection_datetime,Collection Date
+multiset,specimen_identifier,Sample ID
+multiset,result_datetime,Date Analyzed
+multiset,operator,Operator
