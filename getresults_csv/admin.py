@@ -5,7 +5,8 @@ from .models import (
 
 
 class ResultAdmin(admin.ModelAdmin):
-    list_display = ('specimen_identifier', 'collection_datetime', 'panel', 'operator', 'analyzer_name', 'import_history')
+    list_display = ('specimen_identifier', 'collection_datetime', 'panel',
+                    'operator', 'analyzer_name', 'import_history')
     search_fields = ('specimen_identifier', 'source')
 admin.site.register(Result, ResultAdmin)
 
