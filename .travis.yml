@@ -19,7 +19,7 @@ before_script:
   - flake8 getresults_facs
 
 script: 
-  - coverage run --source=getresults_facs manage.py test
+  - coverage run --source=getresults_csv manage.py test
 
 after_success:
   - coveralls
