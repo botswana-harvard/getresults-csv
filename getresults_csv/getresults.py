@@ -20,7 +20,7 @@ class GetResults(object):
             * header_labels: a dictionary of {key: header label} where key is a key expected
               by this class and header label is a field in the CSV header;
             * csv_header_name: Does a lookup by this name on CsvHeader and populates
-              the labels dictionary. if provided overrides labels.
+              the header_labels dictionary. If provided and valid overrides header_labels.
         """
         self.filename = os.path.expanduser(filename)
         try:
@@ -44,7 +44,7 @@ class GetResults(object):
             yield panel_result
 
     def load(self):
-        """Loads the Multiset CSV file into a list of Result instances.
+        """Loads the CSV file into a list of Result instances.
 
         Expects all results in the CSV file to be of the same panel."""
         panel = None
