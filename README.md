@@ -34,7 +34,7 @@ In manage.py shell
 
 Load panels from a CSV file into model Panel/PanelMapping:
 
-    from getresults_facs.utils import load_panels_from_csv
+    from getresults_csv.utils import load_panels_from_csv
 
     # panels define the relevant fields in the file.
     # a panel is made up of items where each item represents a utestid
@@ -47,11 +47,11 @@ Load panels from a CSV file into model Panel/PanelMapping:
     
 Load a Multiset CSV file into models Result/ResultItem:
 
-    from getresults_facs.getresults import GetResults
+    from getresults_csv.getresults import GetResults
     
     # a sample file is available as testdata
 
-    filename = '~/source/getresults-csv/getresults_facs/testdata/rad9A6A3.tmp'
+    filename = '~/source/getresults-csv/getresults_csv/testdata/rad9A6A3.tmp'
 
     
     # load the file and setup the class
