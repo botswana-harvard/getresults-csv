@@ -26,5 +26,5 @@ def load_utestids_from_csv(csv_filename=None):
                     upper_limit=r['upper_limit'] if r['upper_limit'] else None,
                     precision=r['precision'] if r['precision'] else None,
                     formula=r['formula'] if r['formula'] else None,
-                    formula_utestid=r['formula_utestid'].lower() if r['formula_utestid'] else None,
+                    formula_utestid_name=r['formula_utestid_name'].lower() if r['formula_utestid_name'] else None,
                 )

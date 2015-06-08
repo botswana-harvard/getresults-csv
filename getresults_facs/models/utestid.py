@@ -50,7 +50,7 @@ class Utestid(models.Model):
         blank=True,
         help_text='if a calculated value, include an a simple formula or LOG10')
 
-    formula_utestid = models.CharField(
+    formula_utestid_name = models.CharField(
         max_length=10,
         null=True,
         blank=True,

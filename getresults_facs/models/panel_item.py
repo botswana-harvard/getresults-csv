@@ -28,8 +28,9 @@ class PanelItem(models.Model):
     def __str__(self):
         return '{}: {}'.format(self.utestid.name, self.panel.name)
 
-    def value(self, raw_value):
+    def value(self, raw_value, value_type=None):
         """Returns the value as the type defined in value_type."""
+        value_type = value_type or self.utestid.value_type
         if self.utestid.value_type == 'calculated':
             raw_value = self.calculated_value(raw_value)
         if self.utestid.value_datatype == 'string':
@@ -72,9 +73,9 @@ class PanelItem(models.Model):
         value = self.value(raw_value)
         try:
             if value < self.utestid.lower_limit:
-                return ('<', self.utestid.lower_limit)
+                return ('<', self.value(self.utestid.lower_limit, 'absolute'))
             elif value > self.utestid.upper_limit:
-                return ('>', self.utestid.upper_limit)
+                return ('>', self.value(self.utestid.upper_limit, 'absolute'))
         except TypeError:
             pass
         return ('=', value)

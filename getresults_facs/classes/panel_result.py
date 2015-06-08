@@ -29,9 +29,8 @@ class PanelResultItem(object):
 
 
 class PanelResult(object):
-    """Represents a single result within a panel of results.
-
-    For example CD4 Abs within a CD4 Panel of CD4 Abs, CD4%, CD8 Abs, CD8%.
+    """
+    Represents result items for a panel.
     """
     def __init__(self, result_as_dict, source, labels=None):
         self._as_list = []
@@ -48,7 +47,10 @@ class PanelResult(object):
         lbl_analyzer_name = self.parse_labels(labels, 'analyzer_name', 'cytometer')
         lbl_analyzer_sn = self.parse_labels(labels, 'analyzer_sn', 'cytometer serial number')
         lbl_operator = self.parse_labels(labels, 'operator', 'operator')
-        self.panel = Panel.objects.get(name__iexact=result_as_dict[lbl_panel_name].strip())
+        try:
+            self.panel = Panel.objects.get(name__iexact=result_as_dict[lbl_panel_name].strip())
+        except Panel.DoesNotExist as e:
+            raise Panel.DoesNotExist('{} Got \'{}\''.format(str(e), result_as_dict[lbl_panel_name].strip()))
         self.specimen_identifier = result_as_dict[lbl_specimen_identifier]
         self.collection_datetime = tz.localize(parser.parse(result_as_dict[lbl_collection_datetime]))
         self.result_datetime = tz.localize(parser.parse(result_as_dict[lbl_result_datetime]))
@@ -77,9 +79,11 @@ class PanelResult(object):
         """Returns the result as list of PanelResultItems."""
         if not self._as_list:
             calculated = {}
+            utestids = {}
             for panel_item in PanelItem.objects.filter(panel=self.panel):
-                if panel_item.utestid.formula_utestid:
-                    calculated[panel_item.utestid.formula_utestid] = panel_item
+                utestids.update({panel_item.utestid.name: panel_item.utestid})
+                if panel_item.utestid.formula_utestid_name:
+                    calculated[panel_item.utestid.formula_utestid_name] = panel_item
             for mapping in PanelMapping.objects.filter(panel=self.panel):
                 utestid = Utestid.objects.get(name=mapping.utestid_name)
                 panel_item = PanelItem.objects.get(panel=self.panel, utestid=utestid)
@@ -92,14 +96,30 @@ class PanelResult(object):
                         source=self.source,
                     )
                 )
-                if panel_item.utestid.name in calculated:
+                del utestids[utestid.name]
+                try:
+                    calculated_panel_item = calculated[panel_item.utestid.name]
                     self._as_list.append(
                         PanelResultItem(
-                            panel_item=calculated[panel_item.utestid.name],
-                            utestid=calculated[panel_item.utestid.name].utestid,
+                            panel_item=calculated_panel_item,
+                            utestid=calculated_panel_item.utestid,
                             value=self.result_as_dict[mapping.csv_field_name],
                             result_datetime=self.result_datetime,
                             source=self.source,
+                        )
+                    )
+                    del utestids[calculated_panel_item.utestid.name]
+                except KeyError:
+                    pass
+                if utestid in utestids:
+                    panel_item = PanelItem.objects.get(panel=self.panel, utestid=utestid)
+                    self._as_list.append(
+                        PanelResultItem(
+                            panel_item=panel_item,
+                            utestid=utestid,
+                            value=None,
+                            result_datetime=None,
+                            source=None,
                         )
                     )
         return self._as_list

@@ -1,4 +1,4 @@
-name,description,value_type,value_datatype,lower_limit,upper_limit,precision,formula,formula_utestid
+name,description,value_type,value_datatype,lower_limit,upper_limit,precision,formula,formula_utestid_name
 CD4%,CD4 Percent,absolute,integer,,,,,,
 CD8%,CD8 Percent,absolute,integer,,,,,,
 CD4,CD4 Absolute,absolute,integer,,,,,,

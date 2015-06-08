@@ -4,17 +4,25 @@ import os
 from collections import OrderedDict
 
 from .classes import PanelResult
-from .models import Result, ResultItem, ImportHistory
+from .models import Result, ResultItem, ImportHistory, CsvHeaderItem, CsvHeader
 
 
 class GetResults(object):
 
-    def __init__(self, filename, source=None, encoding=None, delimiter=None, labels=None):
+    def __init__(self, filename, source=None, encoding=None, delimiter=None, labels=None, csv_header_name=None):
         self.filename = os.path.expanduser(filename)
+        self.labels = labels
+        try:
+            self.labels = {}
+            self.csv_header = CsvHeader.objects.get(name=csv_header_name)
+            for item in CsvHeaderItem.objects.filter(csv_header=self.csv_header):
+                self.labels.update({item.key: item.header_field})
+        except CsvHeader.DoesNotExist as e:
+            if csv_header_name:
+                raise CsvHeader.DoesNotExist('{} Got \'{}\''.format(e, csv_header_name))
         self.source = source or str(filename.name)
         self.encoding = encoding or 'utf-8'  # mac_roman
         self.panel_results = OrderedDict()
-        self.labels = labels
         self.delimiter = delimiter or '\t'
         self.load()
 
@@ -84,4 +92,5 @@ class GetResults(object):
                         validation_operator=None,
                         validation=None,
                     )
+        # self.archive_file(self.filename)
         return result

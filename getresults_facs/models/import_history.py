@@ -13,5 +13,9 @@ class ImportHistory(models.Model):
     import_datetime = models.DateTimeField(
         default=timezone.now)
 
+    def __str__(self):
+        return '{}: {}'.format(self.source, self.import_datetime)
+
     class Meta:
         app_label = 'getresults_facs'
+        ordering = ('-import_datetime', )
