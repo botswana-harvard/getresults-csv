@@ -29,7 +29,7 @@ class TestGetresult(TestCase):
         self.assertEquals(CsvMapping.objects.all().count(), 29)
         self.assertEquals(Utestid.objects.all().count(), 6)
         self.assertEquals(CsvHeader.objects.all().count(), 2)
-        self.assertEquals(CsvHeaderItem.objects.all().count(), 7)
+        self.assertEquals(CsvHeaderItem.objects.all().count(), 14)
 
     def test_panel_item_string(self):
         """Asserts a string result is imported and formatted correctly."""
