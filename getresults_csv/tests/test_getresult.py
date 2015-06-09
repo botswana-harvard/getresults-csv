@@ -28,7 +28,7 @@ class TestGetresult(TestCase):
         self.assertEquals(PanelItem.objects.all().count(), 6)
         self.assertEquals(CsvMapping.objects.all().count(), 29)
         self.assertEquals(Utestid.objects.all().count(), 6)
-        self.assertEquals(CsvHeader.objects.all().count(), 1)
+        self.assertEquals(CsvHeader.objects.all().count(), 2)
         self.assertEquals(CsvHeaderItem.objects.all().count(), 7)
 
     def test_panel_item_string(self):
