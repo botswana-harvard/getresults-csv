@@ -4,7 +4,9 @@ from dateutil import parser
 
 from django.conf import settings
 
-from ..models import CsvMapping, Panel, Utestid, PanelItem
+from getresults.models import Panel, Utestid, PanelItem
+
+from ..models import CsvMapping
 
 tz = pytz.timezone(settings.TIME_ZONE)
 
@@ -41,7 +43,7 @@ class PanelResult(object):
         self.validation_datetime = None
         self.validation_operator = None
         lbl_panel_name = self.parse_header_labels(header_labels, 'panel_name', 'panel name')
-        lbl_specimen_identifier = self.parse_header_labels(header_labels, 'specimen_identifier', 'sample id')
+        lbl_result_identifier = self.parse_header_labels(header_labels, 'result_identifier', 'sample id')
         lbl_collection_datetime = self.parse_header_labels(header_labels, 'collection_datetime', 'collection date')
         lbl_result_datetime = self.parse_header_labels(header_labels, 'result_datetime', 'date analyzed')
         lbl_analyzer_name = self.parse_header_labels(header_labels, 'analyzer_name', 'cytometer')
@@ -51,7 +53,7 @@ class PanelResult(object):
             self.panel = Panel.objects.get(name__iexact=result_as_dict[lbl_panel_name].strip())
         except Panel.DoesNotExist as e:
             raise Panel.DoesNotExist('{} Got \'{}\''.format(str(e), result_as_dict[lbl_panel_name].strip()))
-        self.specimen_identifier = result_as_dict[lbl_specimen_identifier]
+        self.result_identifier = result_as_dict[lbl_result_identifier]
         self.collection_datetime = tz.localize(parser.parse(result_as_dict[lbl_collection_datetime]))
         self.result_datetime = tz.localize(parser.parse(result_as_dict[lbl_result_datetime]))
         self.analyzer_name = result_as_dict[lbl_analyzer_name]

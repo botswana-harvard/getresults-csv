@@ -5,12 +5,15 @@ from django.conf import settings
 from django.core.exceptions import MultipleObjectsReturned
 from django.test import TestCase
 
+from getresults.models import Panel, PanelItem, Utestid, Result, ResultItem
+from getresults.utils import (
+    load_panel_items_from_csv, load_utestids_from_csv, load_panels_from_csv
+)
+
 from ..classes.panel_result import PanelResultItem, PanelResult
-from ..getresults import GetResults
-from ..models import (
-    Panel, PanelItem, Utestid, ImportHistory, Result, ResultItem, CsvMapping, CsvHeader, CsvHeaderItem)
-from ..utils import (
-    load_panels_from_csv, load_utestids_from_csv, load_panel_items_from_csv, load_csv_headers_from_csv)
+from ..classes.csv_results import CsvResults
+from ..models import ImportHistory, CsvMapping, CsvHeader, CsvHeaderItem
+from ..utils import load_csvmapping_from_csv, load_csv_headers_from_csv
 
 
 class TestGetresult(TestCase):
@@ -18,6 +21,7 @@ class TestGetresult(TestCase):
     def setUp(self):
         """Load testdata."""
         load_panels_from_csv()
+        load_csvmapping_from_csv()
         load_utestids_from_csv()
         load_panel_items_from_csv()
         load_csv_headers_from_csv()
@@ -96,12 +100,12 @@ class TestGetresult(TestCase):
             'analyzer_name': 'analyzer_name',
             'analyzer_sn': 'analyzer_sn',
             'collection_datetime': 'collection_datetime',
-            'specimen_identifier': 'specimen_identifier',
+            'result_identifier': 'result_identifier',
             'result_datetime': 'result_datetime',
             'operator': 'operator',
         }
-        get_results = GetResults(filename, header_labels=header_labels, delimiter=',')
-        result = get_results.save()
+        csv_results = CsvResults(filename, header_labels=header_labels, delimiter=',')
+        result = csv_results.save()
         source = str(filename.name)
         self.assertEquals(ImportHistory.objects.get(source=source).source, source)
         self.assertEquals(ResultItem.objects.filter(result=result).count(), 2)
@@ -110,8 +114,8 @@ class TestGetresult(TestCase):
     def test_header_labels_as_csv_header(self):
         """Asserts a calculated result is created once the formula_utestid value is available."""
         filename = os.path.join(settings.BASE_DIR, 'testdata/vl.csv')
-        get_results = GetResults(filename, csv_header_name='amplicore', delimiter=',')
-        result = get_results.save()
+        csv_results = CsvResults(filename, csv_header_name='amplicore', delimiter=',')
+        result = csv_results.save()
         source = str(filename.name)
         self.assertEquals(ImportHistory.objects.get(source=source).source, source)
         self.assertEquals(ResultItem.objects.filter(result=result).count(), 2)
@@ -125,12 +129,12 @@ class TestGetresult(TestCase):
             'analyzer_name': 'analyzer_name',
             'analyzer_sn': 'analyzer_sn',
             'collection_datetime': 'collection_datetime',
-            'specimen_identifier': 'specimen_identifier',
+            'result_identifier': 'result_identifier',
             'result_datetime': 'result_datetime',
             'operator': 'operator',
         }
-        get_results = GetResults(filename, header_labels=header_labels, delimiter=',')
-        result = get_results.save()
+        csv_results = CsvResults(filename, header_labels=header_labels, delimiter=',')
+        result = csv_results.save()
         source = str(filename.name)
         self.assertEquals(ImportHistory.objects.get(source=source).source, source)
         self.assertEquals(ResultItem.objects.filter(result=result).count(), 2)
@@ -197,13 +201,13 @@ class TestGetresult(TestCase):
 
     def test_result(self):
         filename = os.path.join(settings.BASE_DIR, 'testdata/rad9A6A3.tmp')
-        get_results = GetResults(filename)
-        for panel_result in get_results:
+        csv_results = CsvResults(filename)
+        for panel_result in csv_results:
             self.assertIsInstance(panel_result, PanelResult)
             for panel_result_item in panel_result:
                 self.assertIsInstance(panel_result_item, PanelResultItem)
-        panel_result = get_results.panel_results['AA11540']
-        self.assertEquals(panel_result.specimen_identifier, 'AA11540')
+        panel_result = csv_results.panel_results['AA11540']
+        self.assertEquals(panel_result.result_identifier, 'AA11540')
         self.assertEquals(panel_result.as_dict['cd4'].value, 519)
         self.assertEquals(panel_result.as_dict['cd8'].value, 1007)
         self.assertEquals(panel_result.as_dict['cd4%'].value, 26)
@@ -211,29 +215,33 @@ class TestGetresult(TestCase):
 
     def test_result_save(self):
         filename = os.path.join(settings.BASE_DIR, 'testdata/rad9A6A3.tmp')
-        get_results = GetResults(filename)
-        get_results.save()
+        csv_results = CsvResults(filename)
+        csv_results.save()
 
     def test_import_history(self):
         filename = os.path.join(settings.BASE_DIR, 'testdata/rad9A6A3.tmp')
-        get_results = GetResults(filename)
-        get_results.save()
+        csv_results = CsvResults(filename)
+        csv_results.save()
         source = str(filename.name)
         self.assertEquals(ImportHistory.objects.get(source=source).source, source)
 
     def test_result_duplicate(self):
         filename = os.path.join(settings.BASE_DIR, 'testdata/rad9A6A3.tmp')
-        get_results = GetResults(filename)
-        get_results.save()
+        csv_results = CsvResults(filename)
+        csv_results.save()
         source = str(filename.name)
         import_history = ImportHistory.objects.get(source=source)
-        result = Result.objects.filter(import_history=import_history)
-        self.assertTrue(ResultItem.objects.filter(result=result).exists())
-        result_count = Result.objects.filter(import_history=import_history).count()
-        result_item_count = ResultItem.objects.filter(result=result).count()
+        result_identifiers = import_history.result_identifiers
+        self.assertTrue(ResultItem.objects.filter(
+            result__result_identifier__in=result_identifiers.split(',')).exists())
+        result_count = Result.objects.filter(result_identifier=import_history.result_identifiers.split(',')).count()
+        result_item_count = ResultItem.objects.filter(
+            result__result_identifier__in=result_identifiers.split(',')).count()
         self.assertGreater(result_item_count, 0)
-        get_results = GetResults(filename)
-        get_results.save()
+        csv_results = CsvResults(filename)
+        csv_results.save()
         self.assertRaises(MultipleObjectsReturned, ImportHistory.objects.get, source=source)
-        self.assertEquals(Result.objects.filter(import_history=import_history).count(), result_count)
-        self.assertEquals(ResultItem.objects.filter(result=result).count(), result_item_count)
+        self.assertEquals(Result.objects.filter(
+            result_identifier__in=import_history.result_identifiers).count(), result_count)
+        self.assertEquals(ResultItem.objects.filter(
+            result__result_identifier__in=import_history.result_identifiers.split(',')).count(), result_item_count)

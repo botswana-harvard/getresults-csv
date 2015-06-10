@@ -1,4 +1,4 @@
-panel_name,analyzer_name,analyzer_sn,collection_datetime,specimen_identifier,phm,result_datetime,operator
+panel_name,analyzer_name,analyzer_sn,collection_datetime,result_identifier,phm,result_datetime,operator
 VL,amplicore,34555,2015-05-01 12:55,AA99991,1100,2015-05-03 7:45,TM
 VL,amplicore,34555,2015-05-01 12:55,AA99992,400,2015-05-03 7:45,TM
 VL,amplicore,34555,2015-05-01 12:55,AA99993,750000,2015-05-03 7:45,TM

@@ -5,6 +5,8 @@ from django.utils import timezone
 
 class ImportHistory(models.Model):
 
+    result_identifiers = models.TextField(null=True)
+
     source = models.CharField(
         max_length=50)
 

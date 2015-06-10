@@ -3,22 +3,20 @@ import os
 
 from django.conf import settings
 
-from ..models import Panel, CsvMapping
+from getresults.models import Panel
+
+from ..models import CsvMapping
 
 
-def load_panels_from_csv(csv_filename=None):
+def load_csvmapping_from_csv(csv_filename=None):
     csv_filename = csv_filename or os.path.join(settings.BASE_DIR, 'testdata/panels.csv')
     with open(csv_filename, 'r') as f:
         reader = csv.reader(f, quotechar="'")
         header = next(reader)
         header = [h.lower() for h in header]
-        panel = None
         for row in reader:
             r = dict(zip(header, row))
-            try:
-                panel = Panel.objects.get(name=r['panel'].strip().lower())
-            except Panel.DoesNotExist:
-                panel = Panel.objects.create(name=r['panel'].strip().lower())
+            panel = Panel.objects.get(name=r['panel'].strip().lower())
             try:
                 CsvMapping.objects.get(
                     panel=panel,

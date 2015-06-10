@@ -6,10 +6,9 @@ from collections import OrderedDict
 
 from django.core.management.base import BaseCommand, CommandError
 
-from getresults_csv.utils import (load_panel_items_from_csv,
-                                  load_panels_from_csv,
-                                  load_utestids_from_csv,
-                                  load_csv_headers_from_csv)
+from getresults.utils import load_panels_from_csv, load_utestids_from_csv, load_panel_items_from_csv
+
+from getresults_csv.utils import load_csvmapping_from_csv, load_csv_headers_from_csv
 
 
 class Command(BaseCommand):
@@ -22,13 +21,14 @@ class Command(BaseCommand):
         for path in options['path']:
             try:
                 path = Path(os.path.expanduser(path))
-                files = OrderedDict()
-                files.update({'panels.csv': load_panels_from_csv})
-                files.update({'utestids.csv': load_utestids_from_csv})
-                files.update({'panel_items.csv': load_panel_items_from_csv})
-                files.update({'csv_headers.csv': load_csv_headers_from_csv})
+                files = []
+                files.append(('panels.csv', load_panels_from_csv))
+                files.append(('panels.csv', load_csvmapping_from_csv))
+                files.append(('utestids.csv', load_utestids_from_csv))
+                files.append(('panel_items.csv', load_panel_items_from_csv))
+                files.append(('csv_headers.csv', load_csv_headers_from_csv))
                 sys.stdout.write('Importing from {}...\n'.format(str(path)))
-                for filename, load_func in files.items():
+                for filename, load_func in files:
                     try:
                         sys.stdout.write('    {}'.format(filename))
                         load_func(os.path.join(path, filename))

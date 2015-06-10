@@ -1,6 +1,6 @@
 from django.db import models
 
-from .panel import Panel
+from getresults.models import Panel
 
 
 class CsvMapping(models.Model):

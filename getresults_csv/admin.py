@@ -1,42 +1,12 @@
 from django.contrib import admin
 
 from .models import (
-    Result, ResultItem, Panel, PanelItem, CsvMapping, Utestid, CsvHeader, CsvHeaderItem, ImportHistory)
-
-
-class ResultAdmin(admin.ModelAdmin):
-    list_display = ('specimen_identifier', 'collection_datetime', 'panel',
-                    'operator', 'analyzer_name', 'import_history')
-    search_fields = ('specimen_identifier', 'source')
-admin.site.register(Result, ResultAdmin)
-
-
-class ResultItemAdmin(admin.ModelAdmin):
-    list_display = ('result', 'utestid', 'value', 'quantifier', 'result_datetime')
-    search_fields = ('result__specimen_identifier', 'result__panel__name',
-                     'result_datetime', 'result__import_history__source')
-admin.site.register(ResultItem, ResultItemAdmin)
-
-
-class PanelAdmin(admin.ModelAdmin):
-    pass
-admin.site.register(Panel, PanelAdmin)
+    CsvMapping, CsvHeader, CsvHeaderItem, ImportHistory)
 
 
 class CsvMappingAdmin(admin.ModelAdmin):
     pass
 admin.site.register(CsvMapping, CsvMappingAdmin)
-
-
-class PanelItemAdmin(admin.ModelAdmin):
-    list_display = ('panel', 'utestid')
-    search_fields = ('panel__name', 'utestid__name')
-admin.site.register(PanelItem, PanelItemAdmin)
-
-
-class UtestidAdmin(admin.ModelAdmin):
-    pass
-admin.site.register(Utestid, UtestidAdmin)
 
 
 class CsvHeaderAdmin(admin.ModelAdmin):

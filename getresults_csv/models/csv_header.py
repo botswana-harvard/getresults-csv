@@ -8,7 +8,7 @@ KEYS = (
     ('panel_name', 'panel_name'),
     ('utestid_name', 'utestid_name'),
     ('result_datetime', 'result_datetime'),
-    ('specimen_identifier', 'specimen_identifier'),
+    ('result_identifier', 'result_identifier'),
 )
 
 

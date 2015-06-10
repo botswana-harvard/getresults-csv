@@ -5,8 +5,10 @@ from unipath import Path
 
 from django.core.management.base import BaseCommand, CommandError
 
-from getresults_csv.getresults import GetResults
-from getresults_csv.models import Panel, CsvHeader
+from getresults.models import Panel
+
+from getresults_csv.classes import CsvResults
+from getresults_csv.models import CsvHeader
 
 
 class Command(BaseCommand):
@@ -34,11 +36,11 @@ class Command(BaseCommand):
             for filename in options['filename']:
                 filename = Path(os.path.expanduser(filename))
                 sys.stdout.write('Importing {} ...'.format(filename.name))
-                getresults = GetResults(
+                csv_results = CsvResults(
                     filename,
                     csv_header_name=options['csv_header_name'],
                     delimiter=options['delimiter'])
-                getresults.save()
+                csv_results.save()
                 sys.stdout.write('\nDone\n'.format(filename.name))
         except (Panel.DoesNotExist, CsvHeader.DoesNotExist, FileNotFoundError) as e:
             raise CommandError(e)
