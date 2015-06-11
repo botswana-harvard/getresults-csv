@@ -43,6 +43,8 @@ class PanelResult(object):
         self.validation_datetime = None
         self.validation_operator = None
         lbl_panel_name = self.parse_header_labels(header_labels, 'panel_name', 'panel name')
+        lbl_specimen_identifier = self.parse_header_labels(header_labels, 'specimen_identifier', 'sample id')
+        lbl_order_identifier = self.parse_header_labels(header_labels, 'order_identifier', 'sample id')
         lbl_result_identifier = self.parse_header_labels(header_labels, 'result_identifier', 'sample id')
         lbl_collection_datetime = self.parse_header_labels(header_labels, 'collection_datetime', 'collection date')
         lbl_result_datetime = self.parse_header_labels(header_labels, 'result_datetime', 'date analyzed')
@@ -54,6 +56,8 @@ class PanelResult(object):
         except Panel.DoesNotExist as e:
             raise Panel.DoesNotExist('{} Got \'{}\''.format(str(e), result_as_dict[lbl_panel_name].strip()))
         self.result_identifier = result_as_dict[lbl_result_identifier]
+        self.specimen_identifier = result_as_dict.get(lbl_specimen_identifier, self.result_identifier)
+        self.order_identifier = result_as_dict.get(lbl_order_identifier, self.result_identifier)
         self.collection_datetime = tz.localize(parser.parse(result_as_dict[lbl_collection_datetime]))
         self.result_datetime = tz.localize(parser.parse(result_as_dict[lbl_result_datetime]))
         self.analyzer_name = result_as_dict[lbl_analyzer_name]
