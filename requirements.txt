@@ -1,6 +1,6 @@
-python-dateutil
-Django==1.8.2
+Django>=1.8.2
 Unipath
-pytz
 django-simple-history
-getresults
+python-dateutil
+pytz
+-e git+https://github.com/botswana-harvard/getresults@develop#egg=edc-base
