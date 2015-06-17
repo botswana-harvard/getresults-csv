@@ -85,7 +85,8 @@ class CsvResultRecord(object):
                 try:
                     utestid_mapping = UtestidMapping.objects.get(
                         sender=self.sender,
-                        utestid=panel_item.utestid
+                        utestid=panel_item.utestid,
+                        panel=panel_item.panel,
                     )
                     key = utestid_mapping.sender_utestid_name
                 except UtestidMapping.DoesNotExist:

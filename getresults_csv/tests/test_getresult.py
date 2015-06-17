@@ -34,7 +34,9 @@ class TestGetresult(TestCase):
         )
         load_csv_headers_from_csv()
         load_utestidmappings_from_csv(
-            csv_filename=os.path.join(path, 'utestid_mappings.csv')
+            csv_filename=os.path.join(
+                os.path.expanduser('~/source/getresults/getresults/testdata/'),
+                'utestid_mappings.csv')
         )
 
     def test_load(self):
@@ -45,7 +47,7 @@ class TestGetresult(TestCase):
         self.assertEquals(Utestid.objects.all().count(), 6)
         self.assertEquals(CsvHeader.objects.all().count(), 2)
         self.assertEquals(CsvHeaderItem.objects.all().count(), 14)
-        self.assertEquals(UtestidMapping.objects.all().count(), 5)
+        self.assertEquals(UtestidMapping.objects.all().count(),30)
 #         for obj in UtestidMapping.objects.all():
 #             print(obj.sender.name, obj.sender_utestid_name, obj.utestid.name)
 
@@ -244,16 +246,16 @@ class TestGetresult(TestCase):
         filename = os.path.join(settings.BASE_DIR, 'testdata/rad9A6A3.tmp')
         CsvResults.create_dummy_records = True
         csv_results = CsvResults(filename)
-        for result_record in csv_results:
-            self.assertIsInstance(result_record, CsvResultRecord)
-            for field in result_record:
-                self.assertIsInstance(field, CsvResultRecordItem)
-        result_record = csv_results.result_records['AA11540']
-        self.assertEquals(result_record.result_identifier, 'AA11540')
-        self.assertEquals(result_record.as_dict['cd4'].value, 519)
-        self.assertEquals(result_record.as_dict['cd8'].value, 1007)
-        self.assertEquals(result_record.as_dict['cd4%'].value, 26)
-        self.assertEquals(result_record.as_dict['cd8%'].value, 51)
+        for csv_result_record in csv_results:
+            self.assertIsInstance(csv_result_record, CsvResultRecord)
+            for csv_result_record_item in csv_result_record:
+                self.assertIsInstance(csv_result_record_item, CsvResultRecordItem)
+        csv_result_record = csv_results.csv_result_records['AA11540']
+        self.assertEquals(csv_result_record.result_identifier, 'AA11540')
+        self.assertEquals(csv_result_record.as_dict['cd4'].reportable_value, ('=', 519))
+        self.assertEquals(csv_result_record.as_dict['cd8'].reportable_value, ('=', 1007))
+        self.assertEquals(csv_result_record.as_dict['cd4%'].reportable_value, ('=', 26))
+        self.assertEquals(csv_result_record.as_dict['cd8%'].reportable_value, ('=', 51))
 
     def test_result_save(self):
         filename = os.path.join(settings.BASE_DIR, 'testdata/rad9A6A3.tmp')
