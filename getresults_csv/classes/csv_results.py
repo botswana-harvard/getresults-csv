@@ -3,14 +3,14 @@ import os
 
 from collections import OrderedDict
 
-from getresults.models import Result, ResultItem, Panel, Order
+from getresults.dispatchers import GetResultsDispatcherMixin
 
 from ..models import ImportHistory, CsvHeaderItem, CsvHeader
 
-from .panel_result import PanelResult
+from .csv_result_record import CsvResultRecord
 
 
-class CsvResults(object):
+class CsvResults(GetResultsDispatcherMixin):
 
     def __init__(self, filename, source=None, encoding=None,
                  delimiter=None, header_labels=None, csv_header_name=None):
@@ -38,13 +38,13 @@ class CsvResults(object):
                 self.header_labels = header_labels
         self.source = source or str(filename.name)
         self.encoding = encoding or 'utf-8'  # mac_roman
-        self.panel_results = OrderedDict()
+        self.csv_result_records = OrderedDict()
         self.delimiter = delimiter or '\t'
         self.load()
 
     def __iter__(self):
-        for panel_result in self.panel_results.values():
-            yield panel_result
+        for csv_result_record in self.csv_result_records.values():
+            yield csv_result_record
 
     def load(self):
         """Loads the CSV file into a list of Result instances.
@@ -56,88 +56,50 @@ class CsvResults(object):
             header = next(reader)
             header = [h.lower() for h in header]
             for values in reader:
-                panel_result = PanelResult(dict(zip(header, values)), self.filename,
-                                           header_labels=self.header_labels)
-                self.panel_results[panel_result.result_identifier] = panel_result
+                csv_result_record = CsvResultRecord(
+                    dict(zip(header, values)),
+                    self.filename,
+                    header_labels=self.header_labels)
+                self.csv_result_records[csv_result_record.result_identifier] = csv_result_record
                 if not panel:
-                    panel = panel_result.panel
+                    panel = csv_result_record.panel
                 else:
-                    if panel != panel_result.panel:
+                    if panel != csv_result_record.panel:
                         raise ValueError('Expected one panel per file. Got {} then {}.'.format(
-                            self.panel, panel_result['Panel Name']))
-
-    def result(self, panel_result, order):
-        try:
-            result = Result.objects.get(
-                result_identifier=panel_result.result_identifier,
-                order__panel=panel_result.panel,
-                collection_datetime=panel_result.collection_datetime)
-        except Result.DoesNotExist:
-            result = Result.objects.create(
-                result_identifier=panel_result.result_identifier,
-                order=order,
-                specimen_identifier=panel_result.specimen_identifier,
-                collection_datetime=panel_result.collection_datetime,
-                analyzer_name=panel_result.analyzer_name,
-                analyzer_sn=panel_result.analyzer_sn,
-                operator=panel_result.operator,
-                # validation_datetime=None,
-                # validation_operator=None,
-                # validation=None,
-                # import_history=import_history,
-                # export_history=None,
-            )
-        return result
-
-    def result_item(self, result, panel_result_item):
-        try:
-            result_item = ResultItem.objects.get(
-                result=result,
-                utestid=panel_result_item.utestid,
-                result_datetime=panel_result_item.result_datetime)
-        except ResultItem.DoesNotExist:
-            result_item = ResultItem.objects.create(
-                result=result,
-                utestid=panel_result_item.utestid,
-                value=panel_result_item.value,
-                quantifier=panel_result_item.quantifier,
-                result_datetime=panel_result_item.result_datetime,
-                # validation_datetime=None,
-                # validation_operator=None,
-                # validation=None,
-            )
-        return result_item
-
-    def panel(self, name):
-        try:
-            panel = Panel.objects.get(name=name)
-        except Panel.DoesNotExist:
-            panel = Panel.objects.create(name=name)
-        return panel
-
-    def order(self, panel_result):
-        try:
-            order = Order.objects.get(order_identifier=panel_result.order_identifier)
-        except Order.DoesNotExist:
-            order = Order.objects.create(
-                order_identifier=panel_result.order_identifier,
-                specimen_identifier=panel_result.specimen_identifier,
-                panel=panel_result.panel)
-        return order
+                            self.panel, csv_result_record['Panel Name']))
 
     def save(self):
         """Saves the CSV data to the local result tables."""
         result_identifiers = []
-        for panel_result in self.panel_results.values():
-            order = self.order(panel_result)
-            result = self.result(panel_result, order)
-            result_identifiers.append(result.result_identifier)
-            for panel_result_item in panel_result.as_list:
-                self.result_item(result, panel_result_item)
+        for csv_result_record in self.csv_result_records.values():
+            patient = self.patient(
+                csv_result_record.patient_identifier,
+                csv_result_record.gender,
+                csv_result_record.dob,
+                csv_result_record.registration_datetime)
+            order = self.order(
+                csv_result_record.order_identifier,
+                csv_result_record.order_datetime,
+                'X',
+                'F',
+                csv_result_record.panel,
+                patient
+            )
+            result = self.result(
+                order,
+                csv_result_record.specimen_identifier,
+                csv_result_record.operator,
+                csv_result_record.status,
+                csv_result_record.instrument)
+            result_identifiers.append(str(result.result_identifier))
+            for item in csv_result_record.as_list:
+                self.result_item(
+                    result,
+                    item.utestid,
+                    item)
         ImportHistory.objects.create(
             result_identifiers=','.join(result_identifiers),
             source=self.source,
-            record_count=len(self.panel_results.values())
+            record_count=len(self.csv_result_records.values())
         )
-        # self.archive_file(self.filename)
         return result

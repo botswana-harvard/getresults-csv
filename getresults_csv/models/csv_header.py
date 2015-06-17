@@ -1,5 +1,7 @@
 from django.db import models
 
+from edc_base.model.models import BaseUuidModel
+
 KEYS = (
     ('analyzer_name', 'analyzer_name'),
     ('analyzer_sn', 'analyzer_sn'),
@@ -12,7 +14,7 @@ KEYS = (
 )
 
 
-class CsvHeader(models.Model):
+class CsvHeader(BaseUuidModel):
 
     name = models.CharField(
         max_length=25,
@@ -26,7 +28,7 @@ class CsvHeader(models.Model):
         app_label = 'getresults_csv'
 
 
-class CsvHeaderItem(models.Model):
+class CsvHeaderItem(BaseUuidModel):
 
     csv_header = models.ForeignKey(CsvHeader)
 

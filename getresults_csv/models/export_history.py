@@ -2,8 +2,10 @@ from uuid import uuid4
 
 from django.db import models
 
+from edc_base.model.models import BaseUuidModel
 
-class ExportHistory(models.Model):
+
+class ExportHistory(BaseUuidModel):
 
     destination = models.CharField(
         max_length=25)

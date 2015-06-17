@@ -2,8 +2,10 @@ from django.db import models
 
 from django.utils import timezone
 
+from edc_base.model.models import BaseUuidModel
 
-class ImportHistory(models.Model):
+
+class ImportHistory(BaseUuidModel):
 
     result_identifiers = models.TextField(null=True)
 

@@ -1,2 +1,2 @@
 from .csv_results import CsvResults
-from .panel_result import PanelResult, PanelResultItem
+from .csv_result_record import CsvResultRecordItem, CsvResultRecord

@@ -1,9 +1,11 @@
 from django.db import models
 
+from edc_base.model.models import BaseUuidModel
+
 from getresults.models import Panel
 
 
-class CsvMapping(models.Model):
+class CsvMapping(BaseUuidModel):
     """Model lists map between csv field and the utestid in the panel.
 
     Note: the CSV file does not necessarily fill in all values for a panel
