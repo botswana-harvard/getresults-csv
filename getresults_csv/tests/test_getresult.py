@@ -21,23 +21,12 @@ class TestGetresult(TestCase):
 
     def setUp(self):
         """Load testdata."""
-        path = os.path.expanduser('~/source/getresults-csv/getresults_csv/testdata/')
-        load_panels_from_csv(
-            csv_filename=os.path.join(path, 'panels.csv')
-        )
+        load_panels_from_csv()
         load_csvmapping_from_csv()
-        load_utestids_from_csv(
-            csv_filename=os.path.join(path, 'utestids.csv')
-        )
-        load_panel_items_from_csv(
-            csv_filename=os.path.join(path, 'panel_items.csv')
-        )
+        load_utestids_from_csv()
+        load_panel_items_from_csv()
         load_csv_headers_from_csv()
-        load_utestidmappings_from_csv(
-            csv_filename=os.path.join(
-                os.path.expanduser('~/source/getresults/getresults/testdata/'),
-                'utestid_mappings.csv')
-        )
+        load_utestidmappings_from_csv()
 
     def test_load(self):
         """Assert correct number of records created based on testdata."""
