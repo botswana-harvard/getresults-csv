@@ -37,8 +37,6 @@ class TestGetresult(TestCase):
         self.assertEquals(CsvHeader.objects.all().count(), 2)
         self.assertEquals(CsvHeaderItem.objects.all().count(), 14)
         self.assertEquals(UtestidMapping.objects.all().count(),30)
-#         for obj in UtestidMapping.objects.all():
-#             print(obj.sender.name, obj.sender_utestid_name, obj.utestid.name)
 
     def test_panel_item_string(self):
         """Asserts a string result is imported and formatted correctly."""
