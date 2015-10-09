@@ -1,17 +1,17 @@
 from django.contrib import admin
 
 from .models import (
-    CsvMapping, CsvHeader, CsvHeaderItem, ImportHistory)
+    Header, HeaderItem, ExportHistory, ImportHistory, CsvDefinition)
 
 
-class CsvMappingAdmin(admin.ModelAdmin):
+class CsvDefinitionAdmin(admin.ModelAdmin):
     pass
-admin.site.register(CsvMapping, CsvMappingAdmin)
+admin.site.register(CsvDefinition, CsvDefinitionAdmin)
 
 
-class CsvHeaderAdmin(admin.ModelAdmin):
+class HeaderAdmin(admin.ModelAdmin):
     pass
-admin.site.register(CsvHeader, CsvHeaderAdmin)
+admin.site.register(Header, HeaderAdmin)
 
 
 class ImportHistoryAdmin(admin.ModelAdmin):
@@ -20,7 +20,13 @@ class ImportHistoryAdmin(admin.ModelAdmin):
 admin.site.register(ImportHistory, ImportHistoryAdmin)
 
 
-class CsvHeaderItemAdmin(admin.ModelAdmin):
+class HeaderItemAdmin(admin.ModelAdmin):
     list_display = ('csv_header', 'key', 'header_field')
     search_fields = ('csv_header', 'key', 'header_field')
-admin.site.register(CsvHeaderItem, CsvHeaderItemAdmin)
+admin.site.register(HeaderItem, HeaderItemAdmin)
+
+
+class ExportHistoryAdmin(admin.ModelAdmin):
+    list_display = ('source', 'export_datetime', 'record_count')
+    search_fields = ('source', 'export_datetime', 'record_count')
+admin.site.register(ExportHistory, ExportHistoryAdmin)

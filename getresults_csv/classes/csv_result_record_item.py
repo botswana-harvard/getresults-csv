@@ -10,7 +10,7 @@ class CsvResultRecordItem(object):
         self.reportable_value = utestid.value_with_quantifier(value)
         self.value = value
         self.result_datetime = result_datetime
-        self.completed_at = self.result_datetime
+        self.completed_at = result_datetime
         self.sender = sender
         self.status = status
         self.utestid = utestid

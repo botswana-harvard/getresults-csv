@@ -1,14 +1,14 @@
 header_name,key,header_field
-amplicore,panel_name,panel_name
-amplicore,analyzer_name,analyzer_name
-amplicore,analyzer_sn,analyzer_sn
+amplicore,sender_panel,panel_name
+amplicore,sender,analyzer_name
+amplicore,serial_number,analyzer_sn
 amplicore,collection_datetime,collection_datetime
 amplicore,result_identifier,result_identifier
 amplicore,result_datetime,result_datetime
 amplicore,operator,operator
-multiset,panel_name,Panel Name
-multiset,analyzer_name,Cytometer
-multiset,analyzer_sn,Cytometer Serial Number
+multiset,sender_panel,Panel Name
+multiset,sender,Cytometer
+multiset,serial_number,Serial Number
 multiset,collection_datetime,Collection Date
 multiset,result_identifier,Sample ID
 multiset,result_datetime,Date Analyzed

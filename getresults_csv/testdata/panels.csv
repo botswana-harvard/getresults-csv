@@ -1,4 +1,4 @@
-panel,csv_field,utestid
+sender_panel,csv_field,utestid
 CD3/CD45/CD4/CD8 WITHO,CD3/CD8/CD45/CD4 CD3+CD4+ %Lymph,CD4%
 CD3/CD45/CD4/CD8 WITHO,CD3/CD8/CD45/CD4 CD3+CD4+ Abs Cnt,CD4
 CD3/CD45/CD4/CD8 WITHO,CD3/CD8/CD45/CD4 CD3+CD8+ %Lymph,CD8%

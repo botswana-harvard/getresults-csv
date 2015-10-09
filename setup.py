@@ -22,14 +22,6 @@ setup(
     long_description=README,
     zip_safe=False,
     keywords='CSV FACSCalibur getresults LIMS LIS interface',
-    install_requires=[
-        'Django>=1.8.2',
-        'django-simple-history',
-        'unipath>=1.1',
-        'python-dateutil',
-        'pytz',
-        '-e git+https://github.com/botswana-harvard/getresults@develop#egg=edc-base',
-    ],
     classifiers=[
         'Environment :: Web Environment',
         'Framework :: Django',

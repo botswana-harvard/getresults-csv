@@ -38,8 +38,13 @@ INSTALLED_APPS = (
     'django.contrib.sessions',
     'django.contrib.messages',
     'django.contrib.staticfiles',
+    'getresults_identifier',
+    'getresults_patient',
     'getresults_receive',
     'getresults_aliquot',
+    'getresults_result',
+    'getresults_order',
+    'getresults_sender',
     'getresults',
     'getresults_csv',
 )

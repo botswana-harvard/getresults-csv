@@ -78,19 +78,11 @@ Definitions
 
 The testdata/ folder has sample files of each of these.
 
-Panels
-------
-A panel is a named group of items where each item represents a result. For example, a CD4 panel might
-consist of CD4 Absolute, CD4%, CD8 Absolute and CD8%. A clinic orders a CD4 but expects 4 values on the report.
+## Panels and Panel Items
+Panels and Panel Items make up an order. A `panel` is a named group of items where each item represents a result. For example, a "CD4" panel might consist of CD4 Absolute, CD4%, CD8 Absolute and CD8%. A clinic orders a "CD4" but expects 4 values on the report. A `panel item` represents one item in the panel.
 
-Panel Items
------------
-A panel item represents one item in the panel. It is the link between a the panel and a Utestid.
-
-Utestids
---------
-A Utestid (Universal Test Identifier) represents one result item in a panel. It has attributes and methods
-that further define the result value. For example, the test may be limited to lower and upper limits of
+## Utestids
+A `utestid` (Universal Test Identifier) comes from the perspective of a result and represents one result item in a result. A Utestid is mapped to a panel item. It has attributes and methods that further define the result value. For example, the test may be limited to lower and upper limits of
 detection where a raw value, say 300, if below the lower limit of detection, say 400, should be reported
 as < 400 and not 300.
 

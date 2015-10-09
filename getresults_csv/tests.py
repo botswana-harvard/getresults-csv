@@ -1,104 +1,52 @@
-import math
 import os
 
 from django.conf import settings
 from django.core.exceptions import MultipleObjectsReturned
 from django.test import TestCase
 
-from getresults.models import Panel, PanelItem, Utestid, Result, ResultItem, UtestidMapping
-from getresults.utils import (
-    load_panel_items_from_csv, load_utestids_from_csv, load_panels_from_csv,
-    load_utestidmappings_from_csv
-)
+from getresults_aliquot.models import BaseAliquot
+from getresults_order.models import OrderPanel, OrderPanelItem, Utestid
+from getresults_order.utils import load_utestids_from_csv, load_order_panels_from_csv
+from getresults_result.models import Result, ResultItem
+from getresults_sender.models import SenderPanel
+from getresults_sender.utils import load_sender_panels_from_csv, load_senders_from_csv
 
-from ..classes.csv_result_record import CsvResultRecord, CsvResultRecordItem
-from ..classes.csv_results import CsvResults
-from ..models import ImportHistory, CsvMapping, CsvHeader, CsvHeaderItem
-from ..utils import load_csvmapping_from_csv, load_csv_headers_from_csv
+from .classes import CsvResultRecord, CsvResultRecordItem, CsvResults
+from .models import ImportHistory, CsvDefinition, Header, HeaderItem
+from .utils import load_csv_definitions_from_csv, load_csv_headers_from_csv
 
 
-class TestGetresult(TestCase):
+class DummyAliquot(BaseAliquot):
+
+    class Meta:
+        app_label = 'getresults_csv'
+
+
+class TestGetresults(TestCase):
 
     def setUp(self):
         """Load testdata."""
-        load_panels_from_csv()
-        load_csvmapping_from_csv()
         load_utestids_from_csv()
-        load_panel_items_from_csv()
+        load_sender_panels_from_csv()
+        load_order_panels_from_csv()
+        load_senders_from_csv()
         load_csv_headers_from_csv()
-        load_utestidmappings_from_csv()
+        load_csv_definitions_from_csv()
 
     def test_load(self):
         """Assert correct number of records created based on testdata."""
-        self.assertEquals(Panel.objects.all().count(), 8)
-        self.assertEquals(PanelItem.objects.all().count(), 6)
-        self.assertEquals(CsvMapping.objects.all().count(), 29)
+        self.assertEquals(OrderPanel.objects.all().count(), 8)
+        self.assertEquals(OrderPanelItem.objects.all().count(), 6)
         self.assertEquals(Utestid.objects.all().count(), 6)
-        self.assertEquals(CsvHeader.objects.all().count(), 2)
-        self.assertEquals(CsvHeaderItem.objects.all().count(), 14)
-        self.assertEquals(UtestidMapping.objects.all().count(),30)
+        self.assertEquals(Header.objects.all().count(), 2)
+        self.assertEquals(HeaderItem.objects.all().count(), 14)
+        self.assertEquals(SenderPanel.objects.all().count(), 30)
+        self.assertEquals(CsvDefinition.objects.all().count(), 29)
 
-    def test_panel_item_string(self):
-        """Asserts a string result is imported and formatted correctly."""
-        panel = Panel.objects.create(name='Elisa')
-        utestid = Utestid.objects.create(
-            name='ELISA',
-            value_type='absolute',
-            value_datatype='string')
-        panel_item = PanelItem.objects.create(
-            panel=panel,
-            utestid=utestid)
-        value = panel_item.utestid.value('POS')
-        self.assertEquals(value, 'POS')
-
-    def test_panel_item_integer(self):
-        """Asserts an integer result is imported and formatted correctly."""
-        panel = Panel.objects.create(name='viral load')
-        utestid = Utestid.objects.create(
-            name='PMH',
-            value_type='absolute',
-            value_datatype='integer',
-        )
-        panel_item = PanelItem.objects.create(
-            panel=panel,
-            utestid=utestid,
-        )
-        value = panel_item.utestid.value(100.99)
-        self.assertEquals(value, 101)
-
-    def test_panel_item_decimal(self):
-        """Asserts a decimal result is imported and formatted correctly."""
-        panel = Panel.objects.create(name='viral load')
-        utestid = Utestid.objects.create(
-            name='PMH',
-            value_type='absolute',
-            value_datatype='decimal',
-            precision=1)
-        panel_item = PanelItem.objects.create(
-            panel=panel,
-            utestid=utestid)
-        value = panel_item.utestid.value(100.77)
-        self.assertEquals(value, 100.8)
-
-    def test_panel_item_calc(self):
-        """Asserts a calculated result is formatted correctly."""
-        panel = Panel.objects.create(name='viral load')
-        utestid = Utestid.objects.create(
-            name='PMHLOG',
-            value_type='calculated',
-            value_datatype='decimal',
-            precision=2,
-            formula='LOG10')
-        panel_item = PanelItem.objects.create(
-            panel=panel,
-            utestid=utestid)
-        value = panel_item.utestid.value(750000)
-        self.assertEquals(value, round(math.log10(750000), 2))
-
-    def test_header_labels_as_dict(self):
+    def test_ordered_header_row_as_dict(self):
         """Asserts a calculated result is created once the formula_utestid value is available."""
         filename = os.path.join(settings.BASE_DIR, 'testdata/vl.csv')
-        header_labels = {
+        ordered_header_row = {
             'panel_name': 'panel_name',
             'analyzer_name': 'analyzer_name',
             'analyzer_sn': 'analyzer_sn',
@@ -108,18 +56,18 @@ class TestGetresult(TestCase):
             'operator': 'operator',
         }
         CsvResults.create_dummy_records = True
-        csv_results = CsvResults(filename, header_labels=header_labels, delimiter=',')
+        csv_results = CsvResults(filename, ordered_header_row=ordered_header_row, delimiter=',')
         result = csv_results.save()
         source = str(filename.name)
         self.assertEquals(ImportHistory.objects.get(source=source).source, source)
         self.assertEquals(ResultItem.objects.filter(result=result).count(), 2)
         self.assertTrue(ResultItem.objects.filter(result=result, utestid__name='phmlog10').exists())
 
-    def test_header_labels_as_csv_header(self):
+    def test_ordered_header_row_as_csv_header(self):
         """Asserts a calculated result is created once the formula_utestid value is available."""
         filename = os.path.join(settings.BASE_DIR, 'testdata/vl.csv')
-        CsvResults.create_dummy_records = True
-        csv_results = CsvResults(filename, csv_header_name='amplicore', delimiter=',')
+        csv_results = CsvResults(filename, header_name='amplicore', delimiter=',')
+        print(csv_results.csv_result_records)
         result = csv_results.save()
         source = str(filename.name)
         self.assertEquals(ImportHistory.objects.get(source=source).source, source)
@@ -129,7 +77,7 @@ class TestGetresult(TestCase):
     def test_panel_item_calc_created(self):
         """Asserts a calculated result is created once the formula_utestid value is available."""
         filename = os.path.join(settings.BASE_DIR, 'testdata/vl.csv')
-        header_labels = {
+        ordered_header_row = {
             'panel_name': 'panel_name',
             'analyzer_name': 'analyzer_name',
             'analyzer_sn': 'analyzer_sn',
@@ -138,8 +86,7 @@ class TestGetresult(TestCase):
             'result_datetime': 'result_datetime',
             'operator': 'operator',
         }
-        CsvResults.create_dummy_records = True
-        csv_results = CsvResults(filename, header_labels=header_labels, delimiter=',')
+        csv_results = CsvResults(filename, ordered_header_row=ordered_header_row, delimiter=',')
         result = csv_results.save()
         source = str(filename.name)
         self.assertEquals(ImportHistory.objects.get(source=source).source, source)
@@ -170,69 +117,10 @@ class TestGetresult(TestCase):
                 str(raw_value),
                 (specimen_identifier, raw_value))
 
-    def test_panel_item_formula(self):
-        panel = Panel.objects.create(name='viral load')
-        utestid = Utestid.objects.create(
-            name='PMHLOG',
-            value_type='calculated',
-            value_datatype='decimal',
-            precision=2,
-            formula='1 + log10(100)')
-        panel_item = PanelItem.objects.create(
-            panel=panel,
-            utestid=utestid,
-        )
-        self.assertRaises(ValueError, panel_item.utestid.value, 750000)
-
-    def test_panel_item_quantifier_eq(self):
-        panel = Panel.objects.create(name='viral load')
-        utestid = Utestid.objects.create(
-            name='PMH',
-            value_type='absolute',
-            value_datatype='integer')
-        panel_item = PanelItem.objects.create(
-            panel=panel,
-            utestid=utestid
-        )
-        value_with_quantifier = panel_item.utestid.value_with_quantifier(1000)
-        self.assertEquals(value_with_quantifier, ('=', 1000))
-
-    def test_panel_item_quantifier_lt(self):
-        panel = Panel.objects.create(name='viral load')
-        utestid = Utestid.objects.create(
-            name='PMH',
-            value_type='absolute',
-            value_datatype='integer',
-            lower_limit=400,
-            upper_limit=750000)
-        panel_item = PanelItem.objects.create(
-            panel=panel,
-            utestid=utestid)
-        value_with_quantifier = panel_item.utestid.value_with_quantifier(400)
-        self.assertEquals(value_with_quantifier, ('=', 400))
-        value_with_quantifier = panel_item.utestid.value_with_quantifier(399)
-        self.assertEquals(value_with_quantifier, ('<', 400))
-
-    def test_panel_item_quantifier_gt(self):
-        panel = Panel.objects.create(name='viral load')
-        utestid = Utestid.objects.create(
-            name='PMH',
-            value_type='absolute',
-            value_datatype='integer',
-            lower_limit=400,
-            upper_limit=750000)
-        panel_item = PanelItem.objects.create(
-            panel=panel,
-            utestid=utestid)
-        value_with_quantifier = panel_item.utestid.value_with_quantifier(750000)
-        self.assertEquals(value_with_quantifier, ('=', 750000))
-        value_with_quantifier = panel_item.utestid.value_with_quantifier(750001)
-        self.assertEquals(value_with_quantifier, ('>', 750000))
-
     def test_result(self):
         filename = os.path.join(settings.BASE_DIR, 'testdata/rad9A6A3.tmp')
         CsvResults.create_dummy_records = True
-        csv_results = CsvResults(filename)
+        csv_results = CsvResults(filename, header_name='multiset')
         for csv_result_record in csv_results:
             self.assertIsInstance(csv_result_record, CsvResultRecord)
             for csv_result_record_item in csv_result_record:
@@ -286,12 +174,3 @@ class TestGetresult(TestCase):
         csv_results = CsvResults(filename)
         for result_record in csv_results:
             self.assertEquals(result_record.sender.name, 'e12334567890')
-
-    def test_read_utestidmapping(self):
-        filename = os.path.join(settings.BASE_DIR, 'testdata/rad9A6A3.tmp')
-        CsvResults.create_dummy_records = True
-        csv_results = CsvResults(filename)
-        for result_record in csv_results:
-            utestids = [u.utestid.name for u in UtestidMapping.objects.filter(sender=result_record.sender)]
-            for panel_item in PanelItem.objects.filter(panel=result_record.panel):
-                self.assertIn(panel_item.utestid.name, utestids)
