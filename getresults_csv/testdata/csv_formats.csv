@@ -1,0 +1,3 @@
+name,sender_model,sample_file,delimiter,encoding
+multiset,,rad9A6A3.csv,\t,utf-8
+amplicore,,vl.csv,,utf-8

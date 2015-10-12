@@ -6,7 +6,7 @@ from django.utils.timezone import make_aware, make_naive
 tz = pytz.timezone(settings.TIME_ZONE)
 
 
-def localize(self, value):
+def localize(value):
 
     def my_make_naive(value, tz):
         try:

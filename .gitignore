@@ -7,6 +7,7 @@ __pycache__/
 db.sqlite3
 etc/*
 test-*
+getresults_csv/testdata/.~lock*
 # C extensions
 *.so
 
