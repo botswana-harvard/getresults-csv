@@ -10,6 +10,7 @@ env:
   - DJANGO_VERSION=1.8
 
 install:
+  - pip install pip --upgrade
   - pip install -q Django==$DJANGO_VERSION --use-mirrors
   - pip install flake8 --use-mirrors
   - pip install coveralls --use-mirrors
