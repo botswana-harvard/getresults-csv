@@ -3,6 +3,7 @@ Unipath
 django-simple-history
 python-dateutil
 pytz
+django-crypto-fields
 -e git+https://github.com/botswana-harvard/edc-base@develop#egg=edc_base
 -e git+https://github.com/botswana-harvard/getresults@develop#egg=getresults
 -e git+https://github.com/botswana-harvard/getresults-receive@develop#egg=getresults_receive
