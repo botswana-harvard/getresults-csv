@@ -3,17 +3,10 @@ import os
 from django.conf import settings
 from django.test import TestCase
 
-from getresults_aliquot.models import BaseAliquot
 from getresults_order.models import Utestid
 from getresults_csv.csv_results import CsvResults
 from getresults_csv.models import CsvFormat, CsvField, CsvDictionary
 from getresults_csv.configure import Configure
-
-
-class DummyAliquot(BaseAliquot):
-
-    class Meta:
-        app_label = 'getresults_csv'
 
 
 class TestGetresults(TestCase):
