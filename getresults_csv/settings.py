@@ -112,4 +112,3 @@ STATIC_URL = '/static/'
 
 GIT_DIR = BASE_DIR.ancestor(1)
 CSV_FILE_PATH = '~/'
- 

@@ -1,19 +1,12 @@
-import csv
 import os
 
 from django.conf import settings
-from django.core.exceptions import MultipleObjectsReturned
 from django.test import TestCase
 
 from getresults_aliquot.models import BaseAliquot
-from getresults_order.models import OrderPanel, OrderPanelItem, Utestid
-from getresults_order.utils import load_utestids_from_csv, load_order_panels_from_csv
-from getresults_result.models import Result, ResultItem
-from getresults_sender.models import SenderPanel
-from getresults_sender.utils import load_sender_panels_from_csv, load_senders_from_csv
-
-from .csv_results import CsvResults
-from getresults_csv.models import CsvFormat, CsvField, CsvDictionary, ImportHistory
+from getresults_order.models import Utestid
+from getresults_csv.csv_results import CsvResults
+from getresults_csv.models import CsvFormat, CsvField, CsvDictionary
 from getresults_csv.configure import Configure
 
 
@@ -119,53 +112,4 @@ class TestGetresults(TestCase):
             self.assertEqual([x for x in result_item.as_list() if x is None], [])
 
     def test_configure_and_import_from_files(self):
-        configure = Configure(os.path.join(settings.BASE_DIR, 'testdata'))
-
-#     def test_result(self):
-#         file_format = CsvFormat.objects.get(name='multiset')
-#         csv_results = CsvResults(self.sample_filename, file_format='multiset')
-#         for csv_result_record in csv_results:
-#             self.assertIsInstance(csv_result_record, CsvResultRecord)
-#             for csv_result_record_item in csv_result_record:
-#                 self.assertIsInstance(csv_result_record_item, CsvResultRecordItem)
-#         csv_result_record = csv_results.csv_result_records['AA11540']
-#         self.assertEquals(csv_result_record.result_identifier, 'AA11540')
-#         self.assertEquals(csv_result_record.as_dict['cd4'].reportable_value, ('=', 519))
-#         self.assertEquals(csv_result_record.as_dict['cd8'].reportable_value, ('=', 1007))
-#         self.assertEquals(csv_result_record.as_dict['cd4%'].reportable_value, ('=', 26))
-#         self.assertEquals(csv_result_record.as_dict['cd8%'].reportable_value, ('=', 51))
-
-#     def test_result_save(self):
-#         filename = os.path.join(settings.BASE_DIR, 'testdata/rad9A6A3.tmp')
-#         CsvResults.create_dummy_records = True
-#         csv_results = CsvResults(filename)
-#         csv_results.save()
-
-#     def test_result_duplicate(self):
-#         filename = os.path.join(settings.BASE_DIR, 'testdata/rad9A6A3.tmp')
-#         CsvResults.create_dummy_records = True
-#         csv_results = CsvResults(filename)
-#         csv_results.save()
-#         source = str(filename.name)
-#         import_history = ImportHistory.objects.get(source=source)
-#         result_identifiers = import_history.result_identifiers
-#         self.assertTrue(ResultItem.objects.filter(
-#             result__result_identifier__in=result_identifiers.split(',')).exists())
-#         result_count = Result.objects.filter(result_identifier=import_history.result_identifiers.split(',')).count()
-#         result_item_count = ResultItem.objects.filter(
-#             result__result_identifier__in=result_identifiers.split(',')).count()
-#         self.assertGreater(result_item_count, 0)
-#         csv_results = CsvResults(filename)
-#         csv_results.save()
-#         self.assertRaises(MultipleObjectsReturned, ImportHistory.objects.get, source=source)
-#         self.assertEquals(Result.objects.filter(
-#             result_identifier__in=import_history.result_identifiers).count(), result_count)
-#         self.assertEquals(ResultItem.objects.filter(
-#             result__result_identifier__in=import_history.result_identifiers.split(',')).count(), result_item_count)
-# 
-#     def test_read_sender(self):
-#         filename = os.path.join(settings.BASE_DIR, 'testdata/rad9A6A3.tmp')
-#         CsvResults.create_dummy_records = True
-#         csv_results = CsvResults(filename)
-#         for result_record in csv_results:
-#             self.assertEquals(result_record.sender.name, 'e12334567890')
+        Configure(os.path.join(settings.BASE_DIR, 'testdata'))
