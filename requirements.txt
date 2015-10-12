@@ -7,8 +7,8 @@ pytz
 -e git+https://github.com/botswana-harvard/getresults@develop#egg=getresults
 -e git+https://github.com/botswana-harvard/getresults-receive@develop#egg=getresults_receive
 -e git+https://github.com/botswana-harvard/getresults-aliquot@develop#egg=getresults_aliquot
--e git+https://github.com/botswana-harvard/getresults_identifier@develop#egg=getresults_identifier
--e git+https://github.com/botswana-harvard/getresults_order@develop#egg=getresults_order
--e git+https://github.com/botswana-harvard/getresults_result@develop#egg=getresults_result
--e git+https://github.com/botswana-harvard/getresults_patient@develop#egg=getresults_patient
--e git+https://github.com/botswana-harvard/getresults_sender@develop#egg=getresults_sender
+-e git+https://github.com/botswana-harvard/getresults-identifier@develop#egg=getresults_identifier
+-e git+https://github.com/botswana-harvard/getresults-order@develop#egg=getresults_order
+-e git+https://github.com/botswana-harvard/getresults-result@develop#egg=getresults_result
+-e git+https://github.com/botswana-harvard/getresults-patient@develop#egg=getresults_patient
+-e git+https://github.com/botswana-harvard/getresults-sender@develop#egg=getresults_sender
