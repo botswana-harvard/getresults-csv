@@ -1,14 +1,14 @@
 import os
-
+from os.path import join
 from django.conf import settings
 from django.test import TestCase
 
 from getresults_order.models import Utestid
 from getresults_sender.models import Sender, SenderModel
-from getresults_csv.csv_result import CsvResult
+from getresults_csv.csv_result import CsvResult, BaseSaveHandler
 from getresults_csv.models import CsvFormat, CsvField, CsvDictionary
 from getresults_csv.configure import Configure
-from getresults_csv.csv_interface import CsvInterface
+from getresults_csv.csv_file_handler import CsvFileHandler
 
 
 class TestGetresults(TestCase):
@@ -30,7 +30,7 @@ class TestGetresults(TestCase):
         self.create_csv_dictionary_for_vl()
 
     def sample_filename(self, filename=None):
-        return os.path.join(
+        return join(
             os.path.dirname(os.path.realpath(__file__)), 'testdata/{}'.format(filename or 'rad9A6A3.csv'))
 
     def create_csv_dictionary(self, csv_format, processing_fields, attrs):
@@ -109,9 +109,22 @@ class TestGetresults(TestCase):
             self.assertEqual([x for x in csv_result_item.as_list() if x is None], [])
 
     def test_configure_and_import_from_files(self):
-        Configure(os.path.join(settings.BASE_DIR, 'testdata'))
+        Configure(join(settings.BASE_DIR, 'testdata'))
 
-    def test_interface(self):
-        path = os.path.join(os.path.dirname(os.path.realpath(__file__)), 'testdata')
-        csv_interface = CsvInterface(self.csv_format, path)
-        csv_interface.read()
+    def test_file_handler(self):
+
+        class DoNothingSaveHandler(BaseSaveHandler):
+
+            def save(self, csv_format, results):
+                pass
+
+        source_dir = join(os.path.dirname(os.path.realpath(__file__)), 'testdata')
+        file_patterns = ['*.csv']
+        event_handler = CsvFileHandler(
+            csv_format=self.csv_format,
+            source_dir=source_dir,
+            archive_dir=None,
+            patterns=file_patterns,
+            save_handler=DoNothingSaveHandler(),
+            verbose=False)
+        event_handler.process_existing_files()
