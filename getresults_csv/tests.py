@@ -4,14 +4,18 @@ from django.conf import settings
 from django.test import TestCase
 
 from getresults_order.models import Utestid
-from getresults_csv.csv_results import CsvResults
+from getresults_sender.models import Sender, SenderModel
+from getresults_csv.csv_result import CsvResult
 from getresults_csv.models import CsvFormat, CsvField, CsvDictionary
 from getresults_csv.configure import Configure
+from getresults_csv.csv_interface import CsvInterface
 
 
 class TestGetresults(TestCase):
 
     def setUp(self):
+        sender_model = SenderModel.objects.create(name='FACSCalibur', make='BD')
+        self.sender = Sender.objects.create(serial_number='E43523', sender_model=sender_model)
         self.csv_format = CsvFormat.objects.create(
             name='Multiset',
             sample_file=self.sample_filename(),
@@ -100,9 +104,14 @@ class TestGetresults(TestCase):
                 field_labels.append(csv_dictionary.processing_field)
             except AttributeError:
                 field_labels.append(csv_dictionary.utestid.name)
-        csv_results = CsvResults(self.csv_format, self.sample_filename())
-        for result_item in csv_results:
-            self.assertEqual([x for x in result_item.as_list() if x is None], [])
+        csv_result = CsvResult(self.csv_format, self.sample_filename())
+        for csv_result_item in csv_result:
+            self.assertEqual([x for x in csv_result_item.as_list() if x is None], [])
 
     def test_configure_and_import_from_files(self):
         Configure(os.path.join(settings.BASE_DIR, 'testdata'))
+
+    def test_interface(self):
+        path = os.path.join(os.path.dirname(os.path.realpath(__file__)), 'testdata')
+        csv_interface = CsvInterface(self.csv_format, path)
+        csv_interface.read()

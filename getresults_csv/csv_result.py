@@ -10,7 +10,14 @@ from .models import CsvDictionary
 from .localize import localize
 
 
-class ResultItem(object):
+class BaseSaveHandler(object):
+
+    def save(self, csv_format, results):
+        for result_identifier, csv_result_item in results.items():
+            print(result_identifier, csv_result_item.as_list())
+
+
+class CsvResultItem(object):
 
     def __init__(self, attrs, date_re=None):
         date_re = date_re or '.'
@@ -29,12 +36,19 @@ class ResultItem(object):
     def as_list(self):
         return [self.__dict__.get(k) for k in self.field_list]
 
+    def as_dict(self):
+        return {k: v for k, v in self.__dict__.items() if k in self.field_list}
 
-class CsvResults(object):
 
-    def __init__(self, csv_format, filename):
+class CsvResult(object):
+
+    def __init__(self, csv_format, filename, save_handler=None):
         self.csv_format = csv_format
         self.filename = os.path.expanduser(filename)
+        if save_handler:
+            self.save_handler = save_handler
+        else:
+            self.save_handler = BaseSaveHandler()
         self.field_labels = []
         self.csv_fields = []
         for csv_dictionary in CsvDictionary.objects.filter(csv_format=self.csv_format):
@@ -47,18 +61,25 @@ class CsvResults(object):
         self.results = OrderedDict()
         self.load()
 
+    def __repr__(self):
+        return '{0}({1}, {2})'.format(
+            self.__class__.__name__, self.csv_format.name, self.filename)
+
+    def __str__(self):
+        return (self.csv_format, self.filename)
+
     def __iter__(self):
-        for result_item in self.results.values():
-            yield result_item
+        for csv_result_item in self.results.values():
+            yield csv_result_item
 
     def load(self):
-        """Loads the CSV file into a dictionary of ResultItem instances."""
+        """Loads the CSV file into a dictionary of CsvResultItem instances."""
         with open(self.filename, 'r', encoding=self.csv_format.encoding, newline='') as f:
             reader = csv.reader(f, delimiter=self.csv_format.delimiter)
             header_row = next(reader)
             header_row = [h.strip('\t\n\r') for h in header_row]
             if not self.csv_format.get_header_as_list() == header_row:
-                raise ValueError('CSV file header row does not match CSV format')
+                raise ValueError('CSV file header row does not match csv format {}'.format(self.csv_format.name))
             csv_dictionaries = CsvDictionary.objects.filter(csv_format=self.csv_format)
             for row in reader:
                 attrs = OrderedDict()
@@ -72,8 +93,8 @@ class CsvResults(object):
                     attrs.update({field_label: row.get(csv_dictionary.csv_field.name)})
                     field_list.append(field_label)
                 attrs.update({'field_list': field_list})
-                result_item = ResultItem(attrs)
-                self.results[result_item.result_identifier] = result_item
+                csv_result_item = CsvResultItem(attrs)
+                self.results[csv_result_item.result_identifier] = csv_result_item
 
     def save(self):
-        pass
+        self.save_handler.save(self.csv_format, self.results)
