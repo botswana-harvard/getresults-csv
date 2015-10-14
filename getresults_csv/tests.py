@@ -15,7 +15,8 @@ class TestGetresults(TestCase):
 
     def setUp(self):
         sender_model = SenderModel.objects.create(name='FACSCalibur', make='BD')
-        self.sender = Sender.objects.create(serial_number='E43523', sender_model=sender_model)
+        self.sender = Sender.objects.create(
+            serial_number='E43523', sender_model=sender_model)
         self.csv_format = CsvFormat.objects.create(
             name='Multiset',
             sample_file=self.sample_filename(),
@@ -31,7 +32,8 @@ class TestGetresults(TestCase):
 
     def sample_filename(self, filename=None):
         return join(
-            os.path.dirname(os.path.realpath(__file__)), 'testdata/{}'.format(filename or 'rad9A6A3.csv'))
+            os.path.dirname(os.path.realpath(__file__)),
+            'testdata/{}'.format(filename or 'rad9A6A3.csv'))
 
     def create_csv_dictionary(self, csv_format, processing_fields, attrs):
         for processing_field, csv_field in processing_fields.items():
