@@ -1,4 +1,5 @@
 import os
+from datetime import datetime
 from os.path import join
 from django.conf import settings
 from django.test import TestCase
@@ -9,6 +10,8 @@ from getresults_csv.csv_result import CsvResult, BaseSaveHandler
 from getresults_csv.models import CsvFormat, CsvField, CsvDictionary
 from getresults_csv.configure import Configure
 from getresults_csv.csv_file_handler import CsvFileHandler
+from getresults_csv.getresults.save_handlers import Multiset2DMISSaveHandler
+from _datetime import timedelta
 
 
 class TestGetresults(TestCase):
@@ -128,5 +131,31 @@ class TestGetresults(TestCase):
             archive_dir=None,
             patterns=file_patterns,
             save_handler=DoNothingSaveHandler(),
+            verbose=False)
+        event_handler.process_existing_files()
+
+    def test_file_handler_with_dmis(self):
+
+        class SaveHandler(Multiset2DMISSaveHandler):
+
+            def get_dmis_receive(self, result_identifier):
+                attrs = {
+                    'receive_identifier': result_identifier,
+                    'edc_specimen_identifier': result_identifier,
+                    'protocol_number': 'BHP099',
+                    'patient_identifier': '1234567',
+                    'receive_datetime': datetime.now(),
+                    'drawn_datetime': datetime.now() - timedelta(days=1)}
+                Receive = type('Receive', (object, ), attrs)
+                return Receive()
+
+        source_dir = join(os.path.dirname(os.path.realpath(__file__)), 'testdata')
+        file_patterns = ['*.csv']
+        event_handler = CsvFileHandler(
+            csv_format=self.csv_format,
+            source_dir=source_dir,
+            archive_dir=None,
+            patterns=file_patterns,
+            save_handler=SaveHandler(),
             verbose=False)
         event_handler.process_existing_files()

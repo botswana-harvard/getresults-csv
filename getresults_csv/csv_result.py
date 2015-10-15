@@ -6,8 +6,8 @@ from collections import OrderedDict
 from dateutil.parser import parse
 from decimal import Decimal, InvalidOperation
 
-from .models import CsvDictionary
 from .localize import localize
+from .models import CsvDictionary
 
 
 class BaseSaveHandler(object):

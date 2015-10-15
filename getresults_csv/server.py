@@ -1,6 +1,4 @@
 import os
-from os.path import isfile
-from os import listdir
 import time
 
 from django.utils import timezone

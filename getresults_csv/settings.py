@@ -12,6 +12,7 @@ https://docs.djangoproject.com/en/1.8/ref/settings/
 
 # Build paths inside the project like this: os.path.join(BASE_DIR, ...)
 import os
+import sys
 from unipath import Path
 
 # BASE_DIR = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
@@ -40,6 +41,7 @@ INSTALLED_APPS = (
     'django.contrib.staticfiles',
     'django_crypto_fields',
     'django_revision',
+    # 'dmis_models',
     'getresults_identifier',
     'getresults_patient',
     'getresults_receive',
@@ -86,12 +88,30 @@ WSGI_APPLICATION = 'getresults_csv.wsgi.application'
 # Database
 # https://docs.djangoproject.com/en/1.8/ref/settings/#databases
 
-DATABASES = {
-    'default': {
-        'ENGINE': 'django.db.backends.sqlite3',
-        'NAME': os.path.join(BASE_DIR, 'db.sqlite3'),
+if 'test' in sys.argv:
+    DATABASES = {
+        'default': {
+            'ENGINE': 'django.db.backends.sqlite3',
+            'NAME': os.path.join(BASE_DIR, 'db.sqlite3'),
+        }
     }
-}
+else:
+    DATABASES = {
+        'default': {
+            'ENGINE': 'django.db.backends.sqlite3',
+            'NAME': os.path.join(BASE_DIR, 'db.sqlite3'),
+        },
+    'dmis': {
+        'ENGINE': 'sqlserver_pymssql',
+        'HOST': 'sqltest.bhp.org.bw',
+        'NAME': 'bhplab',
+        'USER': 'sa',
+        'PASSWORD': 'cc3721b',
+        'TEST_NAME': 'bhplab',
+        'TEST_CREATE': False
+        },
+    }
+    DATABASE_ROUTERS = ['getresults_csv.getresults.router.DmisRouter']
 
 
 # Internationalization
