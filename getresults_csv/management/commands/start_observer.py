@@ -15,12 +15,11 @@ class Command(BaseCommand):
     args = '<csv_format_name> <source_dir>'
 
     def handle(self, *args, **options):
-        print(args)
         csv_format = args[0]
-        source_dir = args[2]
+        source_dir = args[1]
         archive_dir = os.path.join(source_dir, 'archive')
-        file_patterns = ['*.csv']
         save_handler = SaveHandler()
+        file_patterns = save_handler.file_patterns
         event_handler = CsvFileHandler(
             csv_format=csv_format,
             source_dir=source_dir,

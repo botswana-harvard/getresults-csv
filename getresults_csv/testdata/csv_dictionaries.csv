@@ -3,7 +3,7 @@ amplicore,sender_panel,panel_name
 amplicore,sender,analyzer_name
 amplicore,serial_number,analyzer_sn
 amplicore,collection_datetime,collection_datetime
-amplicore,result_identifier,result_identifier
+amplicore,order_identifier,order_identifier
 amplicore,result_datetime,result_datetime
 amplicore,operator,operator
 amplicore,PHM,phm
@@ -11,7 +11,7 @@ multiset,sender_panel,Panel Name
 multiset,sender,Cytometer
 multiset,serial_number,Cytometer Serial Number
 multiset,collection_datetime,Collection Date
-multiset,result_identifier,Sample ID
+multiset,order_identifier,Sample ID
 multiset,result_datetime,Date Analyzed
 multiset,operator,Operator
 multiset,CD4,(Average) CD3+CD4+ Abs Cnt

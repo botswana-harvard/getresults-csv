@@ -6,6 +6,7 @@ from collections import OrderedDict
 from dateutil.parser import parse
 from decimal import Decimal, InvalidOperation
 
+from .choices import PROCESS_FIELDS
 from .localize import localize
 from .models import CsvDictionary
 
@@ -13,11 +14,18 @@ from .models import CsvDictionary
 class BaseSaveHandler(object):
 
     def save(self, csv_format, results):
-        for result_identifier, csv_result_item in results.items():
-            print(result_identifier, csv_result_item.as_list())
+        for order_identifier, csv_result_item in results.items():
+            print(order_identifier, csv_result_item.as_list())
 
 
 class CsvResultItem(object):
+    """A simple class that represents one result from the CSV file by commonly
+    named attributes.
+
+    The CsvDictionary for this csv_format maps a CSV field to the correct
+    instance attribute. CsvDictionary "processing fields" map to required instance
+    attributes that are common to all csv_result_items while utestid fields
+    are specific to the sender panel. See CsvDictionary."""
 
     def __init__(self, attrs, date_re=None):
         date_re = date_re or '.'
@@ -31,7 +39,23 @@ class CsvResultItem(object):
                         value = localize(parse(value))
                 except (AttributeError, ValueError):
                     pass
-            setattr(self, attr, value)
+            try:
+                setattr(self, attr, value.strip())
+            except AttributeError:
+                setattr(self, attr, value)
+        missing_attrs = self.missing_attrs()
+        if missing_attrs:
+            raise TypeError(
+                'Some required attrs are not defined. Check csv dictionary '
+                'for this files csv format. Missing {}.'.format(missing_attrs))
+
+    def missing_attrs(self):
+        """Returns None if all required attrs exist in the instance dictionary."""
+        return [k for k in self.required_attrs if k not in self.as_dict()]
+
+    @property
+    def required_attrs(self):
+        return [x[0] for x in PROCESS_FIELDS]
 
     def as_list(self):
         return [self.__dict__.get(k) for k in self.field_list]
@@ -94,7 +118,7 @@ class CsvResult(object):
                     field_list.append(field_label)
                 attrs.update({'field_list': field_list})
                 csv_result_item = CsvResultItem(attrs)
-                self.results[csv_result_item.result_identifier] = csv_result_item
+                self.results[csv_result_item.order_identifier] = csv_result_item
 
     def save(self):
         self.save_handler.save(self.csv_format, self.results)

@@ -1,25 +1,33 @@
 import os
-from datetime import datetime
+
 from os.path import join
+from unipath.path import Path
+from datetime import timedelta
+
 from django.conf import settings
 from django.test import TestCase
-
-from getresults_order.models import Utestid
-from getresults_sender.models import Sender, SenderModel
-from getresults_csv.csv_result import CsvResult, BaseSaveHandler
-from getresults_csv.models import CsvFormat, CsvField, CsvDictionary
+from django.utils import timezone
 from getresults_csv.configure import Configure
 from getresults_csv.csv_file_handler import CsvFileHandler
+from getresults_csv.csv_result import CsvResult, BaseSaveHandler
 from getresults_csv.getresults.save_handlers import Multiset2DMISSaveHandler
-from _datetime import timedelta
+from getresults_csv.models import CsvFormat, CsvField, CsvDictionary
+from getresults_order.models import Utestid
+from getresults_order.utils import load_utestids_from_csv, load_order_panels_from_csv
+from getresults_sender.factories import SenderPanelFactory, SenderFactory
+from getresults_sender.models import Sender, SenderModel
+from getresults_sender.utils import load_sender_panels_from_csv, load_senders_from_csv
+from getresults_result.models import Result, ResultItem
 
 
 class TestGetresults(TestCase):
 
     def setUp(self):
-        sender_model = SenderModel.objects.create(name='FACSCalibur', make='BD')
-        self.sender = Sender.objects.create(
-            serial_number='E43523', sender_model=sender_model)
+        self.source_dir = join(Path(os.path.dirname(os.path.realpath(__file__))).ancestor(1), 'testdata')
+        load_utestids_from_csv()
+        load_order_panels_from_csv()
+        load_sender_panels_from_csv()
+        load_senders_from_csv()
         self.csv_format = CsvFormat.objects.create(
             name='Multiset',
             sample_file=self.sample_filename(),
@@ -34,9 +42,7 @@ class TestGetresults(TestCase):
         self.create_csv_dictionary_for_vl()
 
     def sample_filename(self, filename=None):
-        return join(
-            os.path.dirname(os.path.realpath(__file__)),
-            'testdata/{}'.format(filename or 'rad9A6A3.csv'))
+        return join(self.source_dir, filename or 'rad9A6A3.csv')
 
     def create_csv_dictionary(self, csv_format, processing_fields, attrs):
         for processing_field, csv_field in processing_fields.items():
@@ -60,13 +66,12 @@ class TestGetresults(TestCase):
             collection_date='collection_datetime',
             operator='operator',
             result_datetime='result_datetime',
-            result_identifier='result_identifier',
+            order_identifier='order_identifier',
             sender='analyzer_name',
             sender_panel='panel_name',
             serial_number='analyzer_sn'
         )
-        PHM = Utestid.objects.create(
-            name='PHM', value_type='absolute', value_datatype='integer', units='copies/ml')
+        PHM = Utestid.objects.get(name='PHM')
         attrs = {str(PHM.pk): 'phm'}
         self.create_csv_dictionary(self.csv_format_vl, processing_fields, attrs)
 
@@ -75,19 +80,15 @@ class TestGetresults(TestCase):
             collection_date='Collection Date',
             operator='Operator',
             result_datetime='Date Analyzed',
-            result_identifier='Sample ID',
+            order_identifier='Sample ID',
             sender='Cytometer',
             sender_panel='Panel Name',
             serial_number='Cytometer Serial Number'
         )
-        CD4 = Utestid.objects.create(
-            name='CD4', value_type='absolute', value_datatype='integer', units='cells/mL')
-        CD8_perc = Utestid.objects.create(
-            name='CD8%', value_type='absolute', value_datatype='integer', units='cells/mL')
-        CD8 = Utestid.objects.create(
-            name='CD8', value_type='absolute', value_datatype='integer', units='cells/mL')
-        CD4_perc = Utestid.objects.create(
-            name='CD4%', value_type='absolute', value_datatype='integer', units='cells/mL')
+        CD4 = Utestid.objects.get(name='CD4')
+        CD8_perc = Utestid.objects.get(name='CD8%')
+        CD8 = Utestid.objects.get(name='CD8')
+        CD4_perc = Utestid.objects.get(name='CD4%')
         attrs = {
             str(CD4.pk): '(Average) CD3+CD4+ Abs Cnt',
             str(CD8_perc.pk): '(Average) CD3+CD8+ %Lymph',
@@ -123,11 +124,10 @@ class TestGetresults(TestCase):
             def save(self, csv_format, results):
                 pass
 
-        source_dir = join(os.path.dirname(os.path.realpath(__file__)), 'testdata')
         file_patterns = ['*.csv']
         event_handler = CsvFileHandler(
             csv_format=self.csv_format,
-            source_dir=source_dir,
+            source_dir=self.source_dir,
             archive_dir=None,
             patterns=file_patterns,
             save_handler=DoNothingSaveHandler(),
@@ -138,24 +138,26 @@ class TestGetresults(TestCase):
 
         class SaveHandler(Multiset2DMISSaveHandler):
 
-            def get_dmis_receive(self, result_identifier):
+            def get_dmis_receive(self, order_identifier):
+                """A method to fake calling the SQL Server DB."""
                 attrs = {
-                    'receive_identifier': result_identifier,
-                    'edc_specimen_identifier': result_identifier,
+                    'receive_identifier': order_identifier,
+                    'edc_specimen_identifier': None,
                     'protocol_number': 'BHP099',
                     'patient_identifier': '1234567',
-                    'receive_datetime': datetime.now(),
-                    'drawn_datetime': datetime.now() - timedelta(days=1)}
+                    'receive_datetime': timezone.now(),
+                    'drawn_datetime': timezone.now() - timedelta(days=1)}
                 Receive = type('Receive', (object, ), attrs)
                 return Receive()
 
-        source_dir = join(os.path.dirname(os.path.realpath(__file__)), 'testdata')
         file_patterns = ['*.csv']
         event_handler = CsvFileHandler(
             csv_format=self.csv_format,
-            source_dir=source_dir,
+            source_dir=self.source_dir,
             archive_dir=None,
             patterns=file_patterns,
             save_handler=SaveHandler(),
             verbose=False)
         event_handler.process_existing_files()
+        self.assertEqual(Result.objects.all().count(), 10)
+        self.assertEqual(ResultItem.objects.all().count(), 40)

@@ -3,7 +3,7 @@ PROCESS_FIELDS = (
     ('sender', 'sender'),
     ('serial_number', 'serial_number'),
     ('collection_date', 'collection_date'),
-    ('result_identifier', 'result_identifier'),
+    ('order_identifier', 'order_identifier'),
     ('result_datetime', 'result_datetime'),
     ('operator', 'operator'),
 )

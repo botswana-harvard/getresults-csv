@@ -20,6 +20,11 @@ try:
 except AttributeError:
     path = '~/'
 
+try:
+    file_ext = settings.CSV_FILE_EXT
+except AttributeError:
+    file_ext = "sample*.*.csv"
+
 
 class CsvFormat(BaseUuidModel):
 
@@ -30,9 +35,9 @@ class CsvFormat(BaseUuidModel):
     header_string = models.TextField(null=True, blank=True)
 
     sample_file = models.FilePathField(
-        match="sample*.*\.csv$",
+        match=file_ext,
         path=os.path.expanduser(path),
-        help_text='a file to read the header_string from',
+        help_text='a file to read the header_string from. See also settings.CSV_FILE_PATH and CSV_FILE_EXT',
         null=True,
         blank=True,
     )

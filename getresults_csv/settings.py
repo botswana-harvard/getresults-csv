@@ -41,7 +41,7 @@ INSTALLED_APPS = (
     'django.contrib.staticfiles',
     'django_crypto_fields',
     'django_revision',
-    # 'dmis_models',
+    'dmis_models',
     'getresults_identifier',
     'getresults_patient',
     'getresults_receive',
@@ -53,6 +53,7 @@ INSTALLED_APPS = (
     'getresults_csv',
 )
 
+
 MIDDLEWARE_CLASSES = (
     'django.contrib.sessions.middleware.SessionMiddleware',
     'django.middleware.common.CommonMiddleware',
@@ -61,7 +62,7 @@ MIDDLEWARE_CLASSES = (
     'django.contrib.auth.middleware.SessionAuthenticationMiddleware',
     'django.contrib.messages.middleware.MessageMiddleware',
     'django.middleware.clickjacking.XFrameOptionsMiddleware',
-    'django.middleware.security.SecurityMiddleware',
+    # 'django.middleware.security.SecurityMiddleware',
 )
 
 ROOT_URLCONF = 'getresults_csv.urls'
@@ -103,7 +104,7 @@ else:
         },
     'dmis': {
         'ENGINE': 'sqlserver_pymssql',
-        'HOST': 'sqltest.bhp.org.bw',
+        'HOST': 'mssql.bhp.org.bw',
         'NAME': 'bhplab',
         'USER': 'sa',
         'PASSWORD': 'cc3721b',
@@ -133,4 +134,5 @@ USE_TZ = True
 STATIC_URL = '/static/'
 
 GIT_DIR = BASE_DIR.ancestor(1)
-CSV_FILE_PATH = '~/'
+CSV_FILE_PATH = '~/interface/cd4/'
+CSV_FILE_EXT = [('*.tmp', '*\.tmp$'), ]
