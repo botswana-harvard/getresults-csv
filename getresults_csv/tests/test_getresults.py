@@ -16,7 +16,8 @@ from getresults_order.models import Utestid
 from getresults_order.utils import load_utestids_from_csv, load_order_panels_from_csv
 from getresults_sender.factories import SenderPanelFactory, SenderFactory
 from getresults_sender.models import Sender, SenderModel
-from getresults_sender.utils import load_sender_panels_from_csv, load_senders_from_csv
+from getresults_sender.sender_meta_data import SenderMetaData
+
 from getresults_result.models import Result, ResultItem
 
 
@@ -26,8 +27,10 @@ class TestGetresults(TestCase):
         self.source_dir = join(Path(os.path.dirname(os.path.realpath(__file__))).ancestor(1), 'testdata')
         load_utestids_from_csv()
         load_order_panels_from_csv()
-        load_sender_panels_from_csv()
-        load_senders_from_csv()
+        sender_meta_data = SenderMetaData(
+            sender_file=os.path.join(self.source_dir, 'senders.csv'),
+            sender_panel_file=os.path.join(self.source_dir, 'sender_panels.csv'))
+        sender_meta_data.load_all()
         self.csv_format = CsvFormat.objects.create(
             name='Multiset',
             sample_file=self.sample_filename(),
