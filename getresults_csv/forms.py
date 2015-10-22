@@ -1,5 +1,5 @@
 from django import forms
-from getresults_csv.models import CsvDictionary
+from getresults_csv.models import CsvDictionary, FileImport
 
 
 class CsvDictionaryForm(forms.ModelForm):
@@ -12,4 +12,11 @@ class CsvDictionaryForm(forms.ModelForm):
 
     class Meta:
         model = CsvDictionary
+        fields = '__all__'
+
+
+class FileImportForm(forms.ModelForm):
+
+    class Meta:
+        model = FileImport
         fields = '__all__'

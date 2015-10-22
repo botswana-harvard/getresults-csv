@@ -5,8 +5,10 @@ import re
 from collections import OrderedDict
 from dateutil.parser import parse
 from decimal import Decimal, InvalidOperation
+from django.utils import timezone
 
 from .choices import PROCESS_FIELDS
+from .exceptions import CsvLoadError
 from .localize import localize
 from .models import CsvDictionary
 
@@ -83,7 +85,6 @@ class CsvResult(object):
             except AttributeError:
                 self.field_labels.append(csv_dictionary.utestid.name)
         self.results = OrderedDict()
-        self.load()
 
     def __repr__(self):
         return '{0}({1}, {2})'.format(
@@ -96,6 +97,14 @@ class CsvResult(object):
         for csv_result_item in self.results.values():
             yield csv_result_item
 
+    def __len__(self):
+        return len(self.results)
+
+    @property
+    def description(self):
+        return 'CSV Format \'{}\' using save handler \'{}\''.format(
+            self.csv_format.name, str(self.save_handler))
+
     def load(self):
         """Loads the CSV file into a dictionary of CsvResultItem instances."""
         with open(self.filename, 'r', encoding=self.csv_format.encoding, newline='') as f:
@@ -103,7 +112,10 @@ class CsvResult(object):
             header_row = next(reader)
             header_row = [h.strip('\t\n\r') for h in header_row]
             if not self.csv_format.get_header_as_list() == header_row:
-                raise ValueError('CSV file header row does not match csv format {}'.format(self.csv_format.name))
+                raise CsvLoadError(
+                    '{} failed to load \'{}\' using CSV format \'{}\'. '
+                    'Invalid header format.'.format(
+                        timezone.now(), self.filename, self.csv_format.name))
             csv_dictionaries = CsvDictionary.objects.filter(csv_format=self.csv_format)
             for row in reader:
                 attrs = OrderedDict()

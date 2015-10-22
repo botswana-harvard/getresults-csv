@@ -11,11 +11,9 @@ from getresults_csv.configure import Configure
 from getresults_csv.csv_file_handler import CsvFileHandler
 from getresults_csv.csv_result import CsvResult, BaseSaveHandler
 from getresults_csv.getresults.save_handlers import Multiset2DMISSaveHandler
-from getresults_csv.models import CsvFormat, CsvField, CsvDictionary
+from getresults_csv.models import CsvFormat, CsvField, CsvDictionary, ImportHistory
 from getresults_order.models import Utestid
 from getresults_order.utils import load_utestids_from_csv, load_order_panels_from_csv
-from getresults_sender.factories import SenderPanelFactory, SenderFactory
-from getresults_sender.models import Sender, SenderModel
 from getresults_sender.sender_meta_data import SenderMetaData
 
 from getresults_result.models import Result, ResultItem
@@ -164,3 +162,36 @@ class TestGetresults(TestCase):
         event_handler.process_existing_files()
         self.assertEqual(Result.objects.all().count(), 10)
         self.assertEqual(ResultItem.objects.all().count(), 40)
+
+    def test_updates_import_history(self):
+        class SaveHandler(Multiset2DMISSaveHandler):
+
+            def get_dmis_receive(self, order_identifier):
+                """A method to fake calling the SQL Server DB."""
+                attrs = {
+                    'receive_identifier': order_identifier,
+                    'edc_specimen_identifier': None,
+                    'protocol_number': 'BHP099',
+                    'patient_identifier': '1234567',
+                    'receive_datetime': timezone.now(),
+                    'drawn_datetime': timezone.now() - timedelta(days=1)}
+                Receive = type('Receive', (object, ), attrs)
+                return Receive()
+
+        file_patterns = ['*.csv']
+        event_handler = CsvFileHandler(
+            csv_format=self.csv_format,
+            source_dir=self.source_dir,
+            archive_dir=None,
+            patterns=file_patterns,
+            save_handler=SaveHandler(),
+            verbose=False)
+        event_handler.process_existing_files()
+        self.assertEqual(ImportHistory.objects.filter(success=True).count(), 1)
+        for import_history in ImportHistory.objects.filter(success=True):
+            self.assertEqual(import_history.source, 'rad9A6A3.csv')
+            self.assertEqual(
+                import_history.description,
+                'CSV Format \'Multiset\' using save handler \'Multiset CSV to DMIS\'')
+            self.assertEqual(
+                len(import_history.result_identifiers.split(',')), 10)

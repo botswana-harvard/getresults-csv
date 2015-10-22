@@ -24,6 +24,9 @@ class Multiset2DMISSaveHandler(object):
         for identifier_exclude_pattern in identifier_exclude_patterns:
             self.identifier_exclude_patterns.append(re.compile(identifier_exclude_pattern))
 
+    def __str__(self):
+        return 'Multiset CSV to DMIS'
+
     def get_dmis_receive(self, order_identifier):
         """Dmis has no "order" prior to result. Sample is tested on the receive
         identifier. so start assume receive identifier and order_identifer are the same."""

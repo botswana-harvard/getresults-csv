@@ -1,12 +1,13 @@
-from fnmatch import filter
 from datetime import datetime
 from django.utils import timezone
-from os.path import join
+from fnmatch import filter
 from os import listdir
+from os.path import join
 from shutil import move
 from watchdog.events import PatternMatchingEventHandler
 
-from getresults_csv.models import CsvFormat
+from getresults_csv.exceptions import CsvLoadError
+from getresults_csv.models import CsvFormat, ImportHistory
 
 from .csv_result import CsvResult
 
@@ -14,12 +15,14 @@ from .csv_result import CsvResult
 class CsvFileHandler(PatternMatchingEventHandler):
 
     def __init__(self, csv_format, source_dir, archive_dir, patterns=None,
-                 save_handler=None, verbose=None):
+                 save_handler=None, update_history=None, verbose=None):
         self.csv_format = CsvFormat.objects.get(name=csv_format)
         self.source_dir = source_dir
         self.archive_dir = archive_dir
         self.save_handler = save_handler
+        self.update_history = True if update_history is None else update_history
         self.verbose = True if verbose is None else verbose
+        self.archive_filename = None
         super(CsvFileHandler, self).__init__(patterns=patterns, ignore_directories=True)
 
     def connect(self):
@@ -63,20 +66,39 @@ class CsvFileHandler(PatternMatchingEventHandler):
         self.process(event)
 
     def read_csv_files(self, src_path):
+        archive_filename = None
         try:
             csv_result = CsvResult(self.csv_format, src_path, save_handler=self.save_handler)
-            self.output_to_console(
-                '{} loaded file\'{}\' using CSV format \'{}\'.'.format(
-                    timezone.now(), self.get_filename(src_path), self.csv_format.name))
+            csv_result.load()
+            message = '{} loaded file\'{}\' using CSV format \'{}\'.'.format(
+                timezone.now(), self.get_filename(src_path), self.csv_format.name)
+            self.output_to_console(message)
             csv_result.save()
             self.output_to_console('{} saved data for file \'{}\'.'.format(
                 timezone.now(), self.get_filename(src_path)))
             if self.archive_dir:
-                self.move_to_archive(src_path)
-        except ValueError:
-            self.output_to_console(
-                '{} failed to load \'{}\' using CSV format \'{}\'. Invalid format'.format(
-                    timezone.now(), self.get_filename(src_path), self.csv_format.name))
+                archive_filename = self.move_to_archive(src_path)
+            if self.update_history:
+                ImportHistory.objects.create(
+                    success=True,
+                    source=self.get_filename(src_path),
+                    result_identifiers=','.join(csv_result.results.keys() or []),
+                    archive=archive_filename,
+                    description=csv_result.description,
+                    message=message,
+                    record_count=len(csv_result)
+                )
+        except CsvLoadError as e:
+            message = str(e)
+            self.output_to_console(message)
+            if self.update_history:
+                ImportHistory.objects.create(
+                    success=False,
+                    source=self.get_filename(src_path),
+                    description=csv_result.description,
+                    message=message,
+                )
+        return csv_result
 
     def move_to_archive(self, src_path):
         filename = self.get_filename(src_path)
@@ -86,6 +108,7 @@ class CsvFileHandler(PatternMatchingEventHandler):
         move(src, dst)
         self.output_to_console(
             '{} moved file \'{}\' to archive'.format(timezone.now(), filename))
+        return dst
 
     def get_filename(self, path):
         return path.split(self.source_dir)[1].replace('/', '')

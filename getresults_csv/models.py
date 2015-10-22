@@ -11,9 +11,9 @@ from django.dispatch import receiver
 from django.utils import timezone
 
 from edc_base.model.models import BaseUuidModel
-from getresults_sender.models import SenderModel
 from getresults_csv.choices import PROCESS_FIELDS
 from getresults_order.models import Utestid
+from getresults_sender.models import SenderModel
 
 try:
     path = settings.CSV_FILE_PATH
@@ -150,18 +150,52 @@ class ExportHistory(BaseUuidModel):
 
 class ImportHistory(BaseUuidModel):
 
-    result_identifiers = models.TextField(null=True)
+    success = models.BooleanField(default=False)
 
     source = models.CharField(
         max_length=50)
 
-    record_count = models.IntegerField()
+    record_count = models.IntegerField(null=True)
 
     import_datetime = models.DateTimeField(
         default=timezone.now)
 
+    result_identifiers = models.TextField(null=True)
+
+    archive = models.CharField(
+        max_length=100, null=True)
+
+    description = models.TextField(null=True)
+
+    message = models.TextField(null=True)
+
     def __str__(self):
         return '{}: {}'.format(self.source, self.import_datetime)
+
+    class Meta:
+        app_label = 'getresults_csv'
+        ordering = ('-import_datetime', )
+
+
+class FileImport(BaseUuidModel):
+
+    source_filename = models.CharField(
+        max_length=50)
+
+    archive_filename = models.CharField(
+        max_length=50)
+
+    record_count = models.IntegerField(null=True)
+
+    imported = models.BooleanField(default=False)
+
+    import_datetime = models.DateTimeField(
+        default=timezone.now)
+
+    description = models.TextField(null=True)
+
+    def __str__(self):
+        return '{}: {}'.format(self.source_filename, self.import_datetime)
 
     class Meta:
         app_label = 'getresults_csv'

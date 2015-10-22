@@ -1,0 +1,4 @@
+
+
+class CsvLoadError(Exception):
+    pass

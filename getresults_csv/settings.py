@@ -41,6 +41,7 @@ INSTALLED_APPS = (
     'django.contrib.staticfiles',
     'django_crypto_fields',
     'django_revision',
+    'crispy_forms',
     'dmis_models',
     'getresults_identifier',
     'getresults_patient',
@@ -100,18 +101,17 @@ else:
     DATABASES = {
         'default': {
             'ENGINE': 'django.db.backends.sqlite3',
-            'NAME': os.path.join(BASE_DIR, 'db.sqlite3'),
-        },
-    'dmis': {
-        'ENGINE': 'sqlserver_pymssql',
-        'HOST': 'mssql.bhp.org.bw',
-        'NAME': 'bhplab',
-        'USER': 'sa',
-        'PASSWORD': 'cc3721b',
-        'TEST_NAME': 'bhplab',
-        'TEST_CREATE': False
-        },
+            'NAME': os.path.join(BASE_DIR, 'db.sqlite3')},
+        'dmis': {
+            'ENGINE': 'sqlserver_pymssql',
+            'HOST': 'mssql.bhp.org.bw',
+            'NAME': 'bhplab',
+            'USER': 'sa',
+            'PASSWORD': 'cc3721b',
+            'TEST_NAME': 'bhplab',
+            'TEST_CREATE': False},
     }
+
     DATABASE_ROUTERS = ['getresults_csv.getresults.router.DmisRouter']
 
 
