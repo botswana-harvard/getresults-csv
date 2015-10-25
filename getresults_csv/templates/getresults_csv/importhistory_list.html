@@ -1,0 +1,32 @@
+{% extends 'getresults_result/home.html'%}
+{% load crispy_forms_tags %}
+
+{% block section_labels%}{% endblock section_labels%}
+
+{% block section_header %}
+    <tr>
+      <th>#</th>
+      <th>Source</th>
+      <th>Status</th>
+      <th>Recs</th>
+      <th>Imported</th>
+      <th>Description</th>
+    </tr>
+{% endblock%}
+
+{% block section_rows %}
+	{% for obj in importhistory_list %}
+	  <tr>
+	    {% if is_paginated %}
+	    	<td>{{ forloop.counter|add:page_obj.start_index|add:-1 }}</td>
+	    {% else %}
+	    	<td>{{ forloop.counter }}</td>
+	   	{% endif %}
+	    <td><a href="{% url 'admin:getresults_csv_importhistory_change' obj.id %}?next={{ request.path }}">{{ obj.source }}</a></td>
+	    <td>{% if obj.success %}OK{% else %}failed{%endif%}</td>
+	    <td>{{ obj.record_count|default:'-' }}</td>
+	    <td>{{ obj.import_datetime }}</td>
+	    <td>{{ obj.description }}. {%if not obj.success %}{{obj.message}}{%endif%}</td>
+	  </tr>
+	{% endfor %}
+{% endblock%}

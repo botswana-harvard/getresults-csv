@@ -10,9 +10,11 @@ from getresults_order.models import Order, OrderPanelItem
 from getresults_receive.models import Receive
 from getresults_result.models import Result, ResultItem
 from getresults_sender.models import SenderPanel
+from django.db.utils import OperationalError
+from getresults_csv.csv_result import BaseSaveHandler
 
 
-class Multiset2DMISSaveHandler(object):
+class Multiset2DMISSaveHandler(BaseSaveHandler):
 
     """Save multiset CSV data to DMIS."""
 
@@ -20,6 +22,7 @@ class Multiset2DMISSaveHandler(object):
     file_patterns = [file_ext[0] for file_ext in settings.CSV_FILE_EXT]
 
     def __init__(self):
+        super(Multiset2DMISSaveHandler, self).__init__()
         identifier_exclude_patterns = copy(self.identifier_exclude_patterns)
         for identifier_exclude_pattern in identifier_exclude_patterns:
             self.identifier_exclude_patterns.append(re.compile(identifier_exclude_pattern))
@@ -30,14 +33,13 @@ class Multiset2DMISSaveHandler(object):
     def get_dmis_receive(self, order_identifier):
         """Dmis has no "order" prior to result. Sample is tested on the receive
         identifier. so start assume receive identifier and order_identifer are the same."""
-        for identifier_exclude_pattern in self.identifier_exclude_patterns:
-            if re.match(identifier_exclude_pattern, str(order_identifier)):
-                print('skipping {}'.format(order_identifier))
-                return None
         try:
             receive = DmisReceive.objects.get(receive_identifier=order_identifier)
         except DmisReceive.DoesNotExist:
             print('skipping {}. Not received.'.format(order_identifier))
+            receive = None
+        except OperationalError as e:
+            self.error_messages.append(str(e))
             receive = None
         return receive
 
@@ -69,6 +71,14 @@ class Multiset2DMISSaveHandler(object):
             )
         return order
 
+    def exclude_by_pattern(self, order_identifier):
+        """Returns True if the order_identifier matches one of the exclude patterns."""
+        for identifier_exclude_pattern in self.identifier_exclude_patterns:
+            if re.match(identifier_exclude_pattern, str(order_identifier)):
+                print('skipping {}'.format(order_identifier))
+                return True
+        return False
+
     def save(self, csv_format, csv_results):
 
         # look up received sample in DMIS
@@ -77,44 +87,49 @@ class Multiset2DMISSaveHandler(object):
         # result is ready for validation and export to LIS
 
         for order_identifier, csv_result_item in csv_results.items():
-            dmis_receive = self.get_dmis_receive(order_identifier)
-            if dmis_receive:
+            if self.exclude_by_pattern(order_identifier):
+                continue
+            try:
+                dmis_receive = self.get_dmis_receive(order_identifier)
+                receive_identifier = dmis_receive.receive_identifier
+            except AttributeError:
+                receive_identifier = csv_result_item.order_identifier
+            try:
+                sender_panel = SenderPanel.objects.get(name=csv_result_item.sender_panel)
+            except SenderPanel.DoesNotExist as e:
+                raise ObjectDoesNotExist('{} Got \'{}\''.format(e, csv_result_item.sender_panel))
+            order = self.get_order(
+                order_identifier=receive_identifier,
+                collection_date=csv_result_item.collection_date,
+                sender_panel=sender_panel)
+            result = Result.objects.create(
+                order=order,
+                specimen_identifier=csv_result_item.order_identifier,
+                collection_datetime=csv_result_item.collection_date,
+                analyzer_name=csv_result_item.sender,
+                analyzer_sn=csv_result_item.serial_number,
+                operator=csv_result_item.operator)
+            for order_panel_item in OrderPanelItem.objects.filter(order_panel=sender_panel.order_panel):
                 try:
-                    sender_panel = SenderPanel.objects.get(name=csv_result_item.sender_panel)
-                except SenderPanel.DoesNotExist as e:
-                    raise ObjectDoesNotExist('{} Got \'{}\''.format(e, csv_result_item.sender_panel))
-                order = self.get_order(
-                    order_identifier=dmis_receive.receive_identifier,
-                    collection_date=csv_result_item.collection_date,
-                    sender_panel=sender_panel)
-                result = Result.objects.create(
-                    order=order,
-                    specimen_identifier=csv_result_item.order_identifier,
-                    collection_datetime=csv_result_item.collection_date,
-                    analyzer_name=csv_result_item.sender,
-                    analyzer_sn=csv_result_item.serial_number,
-                    operator=csv_result_item.operator)
-                for order_panel_item in OrderPanelItem.objects.filter(order_panel=sender_panel.order_panel):
-                    try:
-                        result = ResultItem.objects.get(
-                            result=result,
-                            utestid=order_panel_item.utestid)
-                        result.value = getattr(csv_result_item, order_panel_item.utestid.name)
-                        result.raw_value = getattr(csv_result_item, order_panel_item.utestid.name)
-                        result.quantifier = '='
-                        result.result_datetime = csv_result_item.result_datetime
-                        result.sender = csv_result_item.sender
-                        result.save()
-                    except ResultItem.DoesNotExist:
-                        ResultItem.objects.create(
-                            result=result,
-                            utestid=order_panel_item.utestid,
-                            value=getattr(csv_result_item, order_panel_item.utestid.name),
-                            raw_value=getattr(csv_result_item, order_panel_item.utestid.name),
-                            quantifier='=',
-                            result_datetime=csv_result_item.result_datetime,
-                            sender=csv_result_item.sender,
-                            source='')
+                    result = ResultItem.objects.get(
+                        result=result,
+                        utestid=order_panel_item.utestid)
+                    result.value = getattr(csv_result_item, order_panel_item.utestid.name)
+                    result.raw_value = getattr(csv_result_item, order_panel_item.utestid.name)
+                    result.quantifier = '='
+                    result.result_datetime = csv_result_item.result_datetime
+                    result.sender = csv_result_item.sender
+                    result.save()
+                except ResultItem.DoesNotExist:
+                    ResultItem.objects.create(
+                        result=result,
+                        utestid=order_panel_item.utestid,
+                        value=getattr(csv_result_item, order_panel_item.utestid.name),
+                        raw_value=getattr(csv_result_item, order_panel_item.utestid.name),
+                        quantifier='=',
+                        result_datetime=csv_result_item.result_datetime,
+                        sender=csv_result_item.sender,
+                        source=csv_result_item.source)
 
     def save_to_dmis(self):
         pass

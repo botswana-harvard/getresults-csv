@@ -23,6 +23,9 @@ class CsvFileHandler(PatternMatchingEventHandler):
         self.update_history = True if update_history is None else update_history
         self.verbose = True if verbose is None else verbose
         self.archive_filename = None
+        patterns = ['*.csv'] if patterns is None else patterns
+        if not isinstance(patterns, (list, tuple)):
+            raise TypeError('patterns must be a list. Got {}.')
         super(CsvFileHandler, self).__init__(patterns=patterns, ignore_directories=True)
 
     def connect(self):
@@ -70,6 +73,9 @@ class CsvFileHandler(PatternMatchingEventHandler):
         try:
             csv_result = CsvResult(self.csv_format, src_path, save_handler=self.save_handler)
             csv_result.load()
+            if csv_result.save_handler.error_messages:
+                msg = ','.join(list(set(csv_result.save_handler.error_messages)))
+                raise CsvLoadError(msg)
             message = '{} loaded file\'{}\' using CSV format \'{}\'.'.format(
                 timezone.now(), self.get_filename(src_path), self.csv_format.name)
             self.output_to_console(message)
@@ -96,7 +102,7 @@ class CsvFileHandler(PatternMatchingEventHandler):
                     success=False,
                     source=self.get_filename(src_path),
                     description=csv_result.description,
-                    message=message,
+                    message='{}{}'.format(message, ','.join(list(set(csv_result.save_handler.error_messages))))
                 )
         return csv_result
 

@@ -11,9 +11,13 @@ from .choices import PROCESS_FIELDS
 from .exceptions import CsvLoadError
 from .localize import localize
 from .models import CsvDictionary
+from getresults_csv.exceptions import CsvDictionaryError
 
 
 class BaseSaveHandler(object):
+
+    def __init__(self):
+        self.error_messages = []
 
     def save(self, csv_format, results):
         for order_identifier, csv_result_item in results.items():
@@ -108,29 +112,37 @@ class CsvResult(object):
     def load(self):
         """Loads the CSV file into a dictionary of CsvResultItem instances."""
         with open(self.filename, 'r', encoding=self.csv_format.encoding, newline='') as f:
-            reader = csv.reader(f, delimiter=self.csv_format.delimiter)
-            header_row = next(reader)
-            header_row = [h.strip('\t\n\r') for h in header_row]
-            if not self.csv_format.get_header_as_list() == header_row:
-                raise CsvLoadError(
-                    '{} failed to load \'{}\' using CSV format \'{}\'. '
-                    'Invalid header format.'.format(
-                        timezone.now(), self.filename, self.csv_format.name))
-            csv_dictionaries = CsvDictionary.objects.filter(csv_format=self.csv_format)
-            for row in reader:
-                attrs = OrderedDict()
-                field_list = []
-                row = dict(zip(header_row, row))
-                for csv_dictionary in csv_dictionaries:
-                    try:
-                        field_label = csv_dictionary.utestid.name
-                    except AttributeError:
-                        field_label = csv_dictionary.processing_field
-                    attrs.update({field_label: row.get(csv_dictionary.csv_field.name)})
-                    field_list.append(field_label)
-                attrs.update({'field_list': field_list})
-                csv_result_item = CsvResultItem(attrs)
-                self.results[csv_result_item.order_identifier] = csv_result_item
+            try:
+                reader = csv.reader(f, delimiter=self.csv_format.delimiter)
+                header_row = next(reader)
+                header_row = [h.strip('\t\n\r') for h in header_row]
+                if not self.csv_format.get_header_as_list() == header_row:
+                    raise CsvLoadError(
+                        '{} failed to load \'{}\' using CSV format \'{}\'. '
+                        'Invalid header format.'.format(
+                            timezone.now(), self.filename, self.csv_format.name))
+                csv_dictionaries = CsvDictionary.objects.filter(csv_format=self.csv_format)
+                for row in reader:
+                    attrs = OrderedDict()
+                    field_list = []
+                    row = dict(zip(header_row, row))
+                    for csv_dictionary in csv_dictionaries:
+                        try:
+                            field_label = csv_dictionary.utestid.name
+                        except AttributeError:
+                            field_label = csv_dictionary.processing_field
+                        if not field_label:
+                            raise CsvDictionaryError(
+                                'Csv format \'{}\' field \'{}\' must be mapped to either a processing '
+                                ' field or a utestid. Got None for both.'.format(
+                                    self.csv_format, csv_dictionary.csv_field.name))
+                        attrs.update({field_label: row.get(csv_dictionary.csv_field.name)})
+                        field_list.append(field_label)
+                    attrs.update({'field_list': field_list, 'source': self.filename})
+                    csv_result_item = CsvResultItem(attrs)
+                    self.results[str(csv_result_item.order_identifier)] = csv_result_item
+            except (UnicodeDecodeError, csv.Error) as e:
+                print('Unable to read {}. Got {}'.format(self.filename, str(e)))
 
     def save(self):
         self.save_handler.save(self.csv_format, self.results)

@@ -32,6 +32,7 @@ class CsvDictionaryInline(LimitedAdminInlineMixin, admin.TabularInline):
 
 
 class CsvFormatAdmin(admin.ModelAdmin):
+    list_display = ('name', 'sender_model', 'delimiter', 'encoding')
     inlines = [CsvDictionaryInline]
 admin_site.register(CsvFormat, CsvFormatAdmin)
 

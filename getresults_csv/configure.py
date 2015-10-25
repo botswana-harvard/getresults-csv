@@ -3,7 +3,7 @@ import csv
 import os
 
 from decimal import Decimal, InvalidOperation
-
+from django.conf import settings
 from getresults_order.models import Utestid
 from getresults_csv.models import CsvFormat, CsvDictionary, CsvField
 from getresults_sender.models import SenderModel
@@ -21,13 +21,13 @@ class Configure(object):
         * csv_dictionaries.csv: links the csv_format, it's csv_fields to field labels.
           Field labels will be converted to either utestids or "processing field" name.
     """
-    def __init__(self, path, utestids_filename=None, csv_formats_filename=None,
-                 csv_dictionaries_filename=None, load=None):
+    def __init__(self, csv_formats_filename=None, csv_dictionaries_filename=None, import_path=None, load=None):
         load = True if load is None else load
-        self.path = path
-        self.utestids_filename = utestids_filename or 'utestids.csv'
-        self.csv_formats_filename = csv_formats_filename or 'csv_formats.csv'
-        self.csv_dictionaries_filename = csv_dictionaries_filename or 'csv_dictionaries.csv'
+        self.import_path = import_path or os.path.join(settings.BASE_DIR, 'testdata')
+        self.csv_formats_filename = (
+            csv_formats_filename or os.path.join(settings.BASE_DIR, 'testdata/csv_formats.csv'))
+        self.csv_dictionaries_filename = (
+            csv_dictionaries_filename or os.path.join(settings.BASE_DIR, 'testdata/csv_dictionaries.csv'))
         self.utestids_header_row = [
             'name', 'description', 'value_type', 'value_datatype', 'lower_limit',
             'upper_limit', 'precision', 'formula', 'formula_utestid_name']
@@ -40,33 +40,26 @@ class Configure(object):
     def load_all(self):
         """Loads all three files in the correct order."""
         self.load_one(
-            path=self.path,
-            filename=self.utestids_filename,
-            header_row=self.utestids_header_row,
-            create_func=self.create_utestid)
-        self.load_one(
-            path=self.path,
             filename=self.csv_formats_filename,
             header_row=self.csv_formats_header_row,
             create_func=self.create_csv_format)
         self.load_one(
-            path=self.path,
             filename=self.csv_dictionaries_filename,
             header_row=self.csv_dictionaries_header_row,
             create_func=self.create_csv_dictionary)
 
-    def load_one(self, path, filename, header_row, create_func):
+    def load_one(self, filename, header_row, create_func):
         """Loads one file, confirms header row and creates using create_func if
         the instance does not already exist."""
-        with open(os.path.join(path, filename), 'r', encoding='utf-8', newline='') as f:
+        with open(filename, 'r', encoding='utf-8', newline='') as f:
             reader = csv.reader(f, delimiter=',')
             csv_header_row = next(reader)
             self.match_header_row_or_raise(csv_header_row, header_row, filename)
             for row in reader:
                 row = dict(zip(header_row, row))
-                create_func(path, row)
+                create_func(row)
 
-    def create_utestid(self, path, row):
+    def create_utestid(self, row):
         """Creates a utestid instance if one does not already exist."""
         if row.get('name'):
             try:
@@ -84,7 +77,7 @@ class Configure(object):
                     formula_utestid_name=row.get('formula_utestid_name'),
                 )
 
-    def create_csv_dictionary(self, path, row):
+    def create_csv_dictionary(self, row):
         """Creates a csv_dictionary instance if one does not already exist.
 
         Note: the csv_formats and utestids must already exist before this method is called."""
@@ -102,7 +95,7 @@ class Configure(object):
                 csv_field=csv_field,
             )
 
-    def create_csv_format(self, path, row):
+    def create_csv_format(self, row):
         """Creates a csv_format instance if one does not already exist.
 
         The csv_format csv must specify a sample_file for the CsvField model to be
@@ -116,7 +109,7 @@ class Configure(object):
                 except SenderModel.DoesNotExist:
                     sender_model = None
                 if row.get('sample_file'):
-                    sample_file = os.path.join(path, row.get('sample_file'))
+                    sample_file = os.path.join(self.import_path, row.get('sample_file'))
                 else:
                     sample_file = None
                 CsvFormat.objects.create(

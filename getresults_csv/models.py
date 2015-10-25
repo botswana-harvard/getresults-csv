@@ -21,9 +21,23 @@ except AttributeError:
     path = '~/'
 
 try:
-    file_ext = settings.CSV_FILE_EXT
-except AttributeError:
+    file_ext = settings.CSV_FILE_EXT[1]
+except (AttributeError, IndexError):
     file_ext = "sample*.*.csv"
+
+DELIMITERS = (
+    (',', 'Comma'),
+    ('\t', 'Tab'),
+    (';', 'Semi-colon'),
+    ('|', 'Pipe')
+)
+
+ENCODINGS = (
+    ('utf_8', 'utf-8'),
+    ('mac_roman', 'mac-roman'),
+    ('latin_1', 'latin-1'),
+    ('utf_16', 'utf-16'),
+)
 
 
 class CsvFormat(BaseUuidModel):
@@ -37,18 +51,20 @@ class CsvFormat(BaseUuidModel):
     sample_file = models.FilePathField(
         match=file_ext,
         path=os.path.expanduser(path),
-        help_text='a file to read the header_string from. See also settings.CSV_FILE_PATH and CSV_FILE_EXT',
+        help_text=('a file to read the header_string from. '
+                   'See also settings.CSV_FILE_PATH and CSV_FILE_EXT'),
         null=True,
         blank=True,
     )
 
     delimiter = models.CharField(
         max_length=5,
+        choices=DELIMITERS,
         default=',')
 
     encoding = models.CharField(
         max_length=25,
-        choices=(('utf-8', 'utf-8'), ('mac_roman', 'mac_roman')),
+        choices=ENCODINGS,
         default='utf-8'
     )
 
@@ -70,6 +86,8 @@ class CsvFormat(BaseUuidModel):
         self.sample_file = None
 
     def get_header_as_list(self):
+        if not self.header_string:
+            return []
         return [h for h in self.header_string.split('|')]
 
     class Meta:

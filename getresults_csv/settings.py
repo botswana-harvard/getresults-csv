@@ -135,4 +135,4 @@ STATIC_URL = '/static/'
 
 GIT_DIR = BASE_DIR.ancestor(1)
 CSV_FILE_PATH = '~/interface/cd4/'
-CSV_FILE_EXT = [('*.tmp', '*\.tmp$'), ]
+CSV_FILE_EXT = (['*.tmp'], '*\.tmp$')
